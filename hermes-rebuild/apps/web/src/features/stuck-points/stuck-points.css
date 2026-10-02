@@ -1,0 +1,12 @@
+.stuck-point-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.stuck-point-card { display: grid; gap: 8px; }
+.stuck-point-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; }
+.stuck-point-status { font-size: 0.85rem; }
+.stuck-point-status.is-open { color: var(--accent, #2f6f4f); font-weight: 600; }
+.stuck-point-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.stuck-point-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.85rem; }
+.stuck-point-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.stuck-point-actions textarea { flex: 1 1 260px; min-height: 44px; }
+.stuck-point-create { display: grid; gap: 8px; }
+.stuck-point-create textarea { min-height: 44px; }
+.stuck-point-filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }

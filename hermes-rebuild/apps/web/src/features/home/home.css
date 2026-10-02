@@ -1,0 +1,564 @@
+/*
+ * 书房首页样式：按 DESIGN.md 的数值规格贴近参考图 Hermes首页.png
+ * ------------------------------------------------------------------
+ * 结构（见 HomePage.tsx）：
+ *   .home-page
+ *     header.home-heading        标题 + 账号日期（紧凑，一行）
+ *     .page-hero.home-hero       207px 分层米色带 hero（色带 + 纹理 + 内描边 + 线性母题）
+ *     .home-row                  学科徽章卡一行（6 列，184×129，gap 12）
+ *     .home-grid                 继续学习 | 学习线索
+ *     .home-row                  学习方法一行
+ *     .home-grid                 近七日记录 | 可以回顾
+ * 数值来源（DESIGN.md §2）：内容列 ≈1165、学科卡 184×129 / gap 11.6、卡内边距 13/17/19、
+ * 徽章 44×44 圆角 12、标题 16px、副标题 12px、区块标题 19px、hero 207px、区块节奏 27/18/17。
+ * 只引用 shared/ui/tokens.css 的语义令牌，不写死颜色。
+ */
+
+.workspace.home-page {
+  display: grid;
+  gap: var(--space-4);
+  max-width: var(--layout-content-max);
+  margin: var(--space-6) auto 0;
+  padding-bottom: var(--space-6);
+}
+
+.home-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-1);
+}
+
+.home-heading h1 {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-3xl);
+  letter-spacing: var(--tracking-tight);
+}
+
+.home-date {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+/* ---------------- hero：不做实体，横向化进画布 ---------------- */
+
+/* 首页 hero 不沿用 .page-hero 的卡片表层（圆角 + 内描边 + 纵向色带会把它读成「一个盒子」）。
+   改为横向渐隐：左侧色带仍是实体，向右逐渐化进画布，母题坐在渐隐区里像透视。
+   静态下这就是最终外观——不支持 scroll-driven 的浏览器不会看到「卡住不动的动画」。 */
+.home-hero.page-hero {
+  min-height: 0;
+  margin-bottom: var(--space-4);
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background-color: transparent;
+  background-image: none;
+}
+
+.home-hero.page-hero::before {
+  content: "";
+  position: absolute;
+  /* 向右多探出一截：渐隐必须在到达元素边界之前就走完，
+     否则最后几个像素里还剩一点颜色，会读成一条很淡的竖向边界。 */
+  inset: 0 calc(-1 * var(--space-8)) 0 0;
+  pointer-events: none;
+  background-image:
+    var(--hero-texture),
+    linear-gradient(
+      90deg,
+      var(--bg-hero-top) 0%,
+      var(--bg-hero-mid) 40%,
+      var(--bg-hero-bottom) 62%,
+      transparent 88%
+    );
+  /* 上下边缘也收一点，避免出现生硬的横向色带边界 */
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 84%, transparent 100%);
+}
+
+.home-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.home-hero .home-section {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.home-hero .home-section-heading {
+  margin-bottom: var(--space-1);
+}
+
+/* 只收窄区块标题（.home-section-heading h2），不要命中 hero 里的金句 h2
+   （.daily-quote-text 也是 h2；早前写成 .home-section h2 会把 30px 金句压成 12px）。 */
+.home-hero .home-section-heading h2 {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* 右侧母题：压小、降低对比，当纹理用而不是当主体。
+   （它替代的是参考图里那张照片；参考图照片是有重量的主体，
+   但我们这里没有照片、也没有信息要承载，做成主体就会抢金句。） */
+.home-hero__motif {
+  position: absolute;
+  right: var(--space-6);
+  bottom: var(--space-2);
+  display: flex;
+  align-items: flex-end;
+  color: var(--accent-warm-ink);
+  opacity: 0.34;
+  pointer-events: none;
+}
+
+.home-hero__motif svg {
+  width: clamp(200px, 20vw, 300px);
+  height: auto;
+  max-height: 100%;
+}
+
+/* 母题会随 hero 高度缩放，non-scaling-stroke 让描边在任何缩放下都保持恒定，
+   避免小尺寸时又变淡。 */
+.home-hero__motif svg * {
+  vector-effect: non-scaling-stroke;
+}
+
+/* 金句行宽：只约束到「不压到母题」为止，不要为母题留出过多空白。
+   参考图那句话按句读断成两行；过早收窄（-500px）会让它断在「但」后面。 */
+@media (min-width: 1025px) {
+  .home-hero .home-section .daily-quote-text {
+    max-width: calc(100% - 340px);
+  }
+}
+
+/* ---------------- hero 折叠（scroll-driven，原生、无 JS） ----------------
+   金句是「每日开场」：看一次就够，往下滚时把它交给顶栏承接。
+   只有不承载唯一信息的装饰层才允许折叠；日期与金句在顶栏仍然可见（§ 顶栏承接位）。
+   不支持 animation-timeline 的浏览器直接落在上面的静态外观——hero 不折叠、
+   信息也就在原位，不会丢。 */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .home-hero .daily-quote-text {
+      animation: hero-quote-collapse linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 300px;
+    }
+
+    .home-hero__motif {
+      animation: hero-motif-collapse linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 300px;
+    }
+  }
+}
+
+@keyframes hero-quote-collapse {
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes hero-motif-collapse {
+  to {
+    opacity: 0;
+    transform: translateY(12px) scale(0.94);
+  }
+}
+
+/* ---------------- 分区与栏位 ---------------- */
+
+.home-row,
+.home-grid {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.home-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+.home-column {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.home-section {
+  min-width: 0;
+  padding: var(--space-4) var(--space-5);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-panel);
+}
+
+.home-section h2 {
+  margin: 0;
+  font-size: var(--text-xl);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+}
+
+.home-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+/* 区块标题右侧的动作组：次级入口（软绿）+ 文字链接 */
+.home-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.home-heading-actions button {
+  min-height: var(--control-height-compact);
+  font-size: var(--text-sm);
+}
+
+.home-primary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.home-inline-link {
+  min-height: var(--control-height-compact);
+  padding: var(--space-1) 0;
+  border: 0;
+  color: var(--text-secondary);
+  background: none;
+  font-size: var(--text-sm);
+}
+
+.home-inline-link:hover {
+  color: var(--text-accent);
+  text-decoration: underline;
+  opacity: 1;
+}
+
+.home-section-error {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: var(--focus-ring-width) solid var(--border-danger);
+  color: var(--text-danger);
+  background: var(--bg-danger-soft);
+  font-size: var(--text-sm);
+}
+
+.home-section-error button {
+  margin-left: var(--space-2);
+}
+
+/* ---------------- 学科徽章卡（DESIGN.md §2） ----------------
+   学科网格与学科卡样式在 shared/ui/cards.css（首页与学科空间共用），
+   首页只负责网格列数与卡片排布。 */
+
+.home-subject-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* 首页的学科网格与学科空间一致（.subject-grid 在 shared/ui/cards.css 定义），
+   这里只保留首页特有的列数覆盖。 */
+
+/* ---------------- 继续学习 / 学习线索 ---------------- */
+
+.home-continue {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.home-continue h3 {
+  margin: var(--space-1) 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+}
+
+.home-continue p {
+  margin: var(--space-1) 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.home-evidence-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-evidence-list li {
+  padding-top: var(--space-3);
+  border-top: var(--border-width) solid var(--border-subtle);
+}
+
+.home-evidence-list li:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.home-evidence-list p {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+}
+
+.home-evidence-meta {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.home-source-button {
+  min-height: var(--control-height-compact);
+  padding: var(--space-1) var(--space-1) var(--space-1) 0;
+  border: 0;
+  color: var(--text-secondary);
+  background: transparent;
+  font-size: var(--text-xs);
+  text-align: left;
+}
+
+.home-source-button:hover:not(:disabled) {
+  color: var(--text-primary);
+  text-decoration: underline;
+  opacity: 1;
+}
+
+.home-empty {
+  margin: 0;
+  padding: var(--space-1) 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+}
+
+.home-changes-summary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.home-changes-summary strong {
+  color: var(--text-primary);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-medium);
+}
+
+/* ---------------- 学习方法一行 ---------------- */
+
+.home-methods {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.home-method {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+}
+
+.home-method h3 {
+  margin: 0;
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-medium);
+}
+
+.home-method p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+/* 首页的方法卡是入口预览：按钮贴合文字宽度，不撑满卡片。
+   DESIGN.md §3.3：同屏只允许 1 个实心绿主操作（首页是「继续上次」），
+   方法卡开始按钮用软绿次级样式（.secondary），实心绿只留给主操作。 */
+.home-method .method-card__actions button {
+  flex: 0 1 auto;
+  justify-self: start;
+  min-height: var(--control-height-compact);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.home-lulu-slot {
+  display: flex;
+  justify-content: flex-end;
+  margin: var(--space-4) 0;
+}
+
+/* ---------------- hero 内金句排版（参考图 12–13 / 28–30 / 14px） ---------------- */
+
+.home-section .daily-quote {
+  margin-top: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.home-section .daily-quote-heading {
+  margin-bottom: 0;
+}
+
+.home-section .daily-quote-text {
+  max-width: var(--layout-reading-max);
+  margin: var(--space-2) 0;
+  font-family: var(--font-serif);
+  font-size: var(--text-hero);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+}
+
+.home-section .daily-quote-author {
+  font-size: var(--text-base);
+}
+
+.home-section .quote-actions {
+  margin-top: var(--space-3);
+}
+
+.home-section .daily-quote .quote-library-link,
+.home-section .daily-quote .quote-library-link-bottom {
+  min-height: var(--control-height-compact);
+}
+
+/* 参考图的金句在米色带里左对齐；我的金句页保持它自己的居中版式。 */
+.home-hero .daily-quote-text,
+.home-hero .daily-quote-author {
+  text-align: left;
+}
+
+.home-hero .quote-actions {
+  justify-content: flex-start;
+}
+
+.home-hero .eyebrow,
+.home-hero .daily-quote-heading .eyebrow {
+  font-size: var(--text-sm);
+}
+
+/* ---------------- 断点 ---------------- */
+
+@media (max-width: 1024px) {
+  .home-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .home-subject-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .home-methods {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-hero {
+    padding: var(--space-5) var(--space-6);
+  }
+
+  /* ≤1024 的 hero 只有约 776px 宽，30px 金句一行约 480px + 母题 307px 会相撞，
+     因此这个断点以下隐藏母题（把宽度让给金句），≥1025 才显示。 */
+  .home-hero__motif {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .workspace.home-page {
+    margin-top: var(--space-4);
+    gap: var(--space-3);
+  }
+
+  .home-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .home-heading h1 {
+    font-size: var(--text-2xl);
+  }
+
+  .home-section {
+    padding: var(--space-4);
+  }
+
+  .home-hero {
+    min-height: 0;
+    padding: var(--space-5);
+  }
+
+  .home-hero__motif {
+    display: none;
+  }
+
+  .home-section .daily-quote-text {
+    font-size: var(--text-xl);
+  }
+
+  .home-subject-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .subject-card {
+    min-height: 0;
+  }
+
+  .home-methods {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .home-continue {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .home-continue button {
+    width: 100%;
+  }
+
+  .home-section-heading {
+    align-items: flex-start;
+  }
+
+  .home-lulu-slot {
+    justify-content: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-page * {
+    scroll-behavior: auto;
+  }
+
+  .subject-card {
+    transition: none;
+  }
+}

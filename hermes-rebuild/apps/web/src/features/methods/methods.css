@@ -1,0 +1,285 @@
+/*
+ * 学习方法页样式：对齐参考图 Hermes学习方法.png 的版式与留白。
+ * ------------------------------------------------------------------
+ * 结构（见 MethodsBrowser.tsx / MethodCards.tsx）：
+ *   .methods-page
+ *     header.methods-hero        暖米色带：标题 + 副标题
+ *     section.situation-section  当前情境（情境卡网格 + 推荐说明）
+ *     section.methods-catalog    方法卡网格（每卡：图标 + 标题 + 摘要 + 四个字段 + 操作）
+ *     .method-detail-grid        方法详情（沿用原来的面板列表）
+ * 只引用 shared/ui/tokens.css 的语义令牌，不写死颜色。
+ */
+
+/* 两段式选择器：styles.css 里的 .workspace 在样式产物中更靠后，需要更高优先级才能放宽到内容列宽度。 */
+.workspace.methods-page {
+  display: grid;
+  gap: var(--space-6);
+  max-width: var(--layout-content-max);
+  margin: var(--space-7) auto 0;
+}
+
+/* .page-hero 提供米色底与排版（shared/ui/styles.css），这里只放本页特有的宽度与断点。 */
+.methods-hero {
+  max-width: none;
+}
+
+.methods-page h2 {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-xl);
+}
+
+/* ---------------- 当前情境 ---------------- */
+
+.situation-section {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+}
+
+.situation-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+
+.situation-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--control-height);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  background: var(--bg-card);
+  font-size: var(--text-base);
+  text-align: left;
+}
+
+.situation-choice:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: var(--bg-nav-hover);
+  opacity: 1;
+}
+
+.situation-choice.selected {
+  border-color: var(--border-accent);
+  color: var(--text-accent);
+  background: var(--bg-nav-active);
+}
+
+.methods-recommendation,
+.methods-reason {
+  margin-top: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-left: var(--focus-ring-width) solid var(--accent-primary);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  color: var(--text-primary);
+  background: var(--bg-accent-soft);
+}
+
+.methods-recommendation p,
+.methods-reason p {
+  margin: var(--space-1) 0;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+}
+
+.methods-recommendation button {
+  margin-top: var(--space-3);
+}
+
+/* ---------------- 方法目录 ---------------- */
+
+.methods-catalog {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.methods-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.methods-section-heading h2 {
+  margin: 0;
+}
+
+.methods-clear,
+.methods-back {
+  min-height: var(--control-height-compact);
+  padding: var(--space-2) var(--space-3);
+  border-color: var(--border-default);
+  color: var(--text-secondary);
+  background: transparent;
+}
+
+.method-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-5);
+}
+
+.method-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-6);
+}
+
+.method-card h3 {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+}
+
+.method-card > p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+}
+
+.method-card__icon {
+  margin-bottom: var(--space-2);
+}
+
+.method-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.method-card__actions button {
+  flex: 1 1 auto;
+  min-height: var(--control-height);
+  font-size: var(--text-base);
+}
+
+/* 卡片内的字段行（密度 full）：标签小一号，正文用次级文本 */
+.method-field h4 {
+  margin: var(--space-3) 0 var(--space-1);
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.method-field p {
+  min-height: 0;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+}
+
+.method-field ul,
+.method-field ol {
+  margin: 0;
+  padding-left: var(--space-5);
+}
+
+.method-field li {
+  padding: var(--space-1) 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+}
+
+/* ---------------- 方法详情 ---------------- */
+
+.method-detail-grid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.method-detail {
+  padding: var(--space-6);
+}
+
+.method-detail ul,
+.method-detail ol {
+  margin: 0;
+  padding-left: var(--space-6);
+}
+
+.method-detail li {
+  padding: var(--space-1) 0;
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+.method-detail > p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+.method-start button {
+  margin-top: var(--space-3);
+}
+
+.methods-empty {
+  padding: var(--space-5) 0;
+  color: var(--text-secondary);
+}
+
+.methods-reason span,
+.methods-reason strong {
+  display: block;
+}
+
+.methods-reason span {
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+}
+
+.methods-reason strong {
+  margin-top: var(--space-1);
+}
+
+.methods-reason p {
+  margin: var(--space-2) 0 0;
+}
+
+@media (max-width: 1024px) {
+  .methods-page {
+    margin-top: var(--space-6);
+  }
+
+  .methods-hero {
+    padding: var(--space-6);
+  }
+}
+
+@media (max-width: 600px) {
+  .methods-page {
+    margin-top: var(--space-5);
+  }
+
+  .method-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .method-card,
+  .method-detail,
+  .situation-section {
+    padding: var(--space-5);
+  }
+
+  .methods-hero {
+    padding: var(--space-5);
+  }
+
+  .methods-reason,
+  .methods-recommendation {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .method-card__actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,0 +1,10 @@
+**/node_modules
+**/.venv
+**/.uv-cache
+**/.pnpm-store
+**/dist
+**/__pycache__
+**/.env
+**/*.db
+**/*.sqlite*
+.git

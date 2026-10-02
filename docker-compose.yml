@@ -1,0 +1,46 @@
+# Cloud Hermes Core V1 — local/cloud orchestration.
+#
+# Ingress contract (enforced): the app binds 0.0.0.0:8080 INSIDE the container; the host
+# publishes it ONLY on loopback 127.0.0.1:8080. nginx (or your cloud LB) terminates TLS on
+# 443 and proxies to http://127.0.0.1:8080. The DB and local Windows service are NEVER
+# exposed publicly.
+#
+# Data persistence contract: the production host data directory defaults to
+# /var/lib/hermes-cloud and is bind-mounted to /data in the container. Tests MUST override
+# HERMES_DATA_DIR with a throwaway temp directory and MUST NOT write to /var/lib/hermes-cloud.
+#
+# Public HTTPS ingress is a separate deployment stage.
+
+services:
+  hermes-cloud:
+    build: .
+    restart: unless-stopped
+    environment:
+      HERMES_ENV: production
+      HERMES_BIND_HOST: "0.0.0.0"
+      HERMES_PORT: "8080"
+      HERMES_DB_PATH: "/data/hermes_cloud.db"
+      # Secrets are supplied by the deployment environment / secret manager, NOT here:
+      HERMES_SECRET_KEY: "${HERMES_SECRET_KEY}"
+      PROVIDER_BASE_URL: "${PROVIDER_BASE_URL}"
+      PROVIDER_API_KEY: "${PROVIDER_API_KEY}"
+      PROVIDER_MODEL: "${PROVIDER_MODEL}"
+      ADMIN_INIT_TOKEN: "${ADMIN_INIT_TOKEN}"
+      # Mock provider is OFF by default (production requires a real key). Set
+      # HERMES_MOCK_PROVIDER=1 only for isolated package-repair / CI smoke runs.
+      HERMES_MOCK_PROVIDER: "${HERMES_MOCK_PROVIDER:-0}"
+    # Host publishes the app ONLY on loopback. Never publish as "8080:8080" (binds 0.0.0.0)
+    # and never expose the container port to the public interface.
+    ports:
+      - "127.0.0.1:8080:8080"
+    # `expose` alone does NOT publish to the host; it is kept for in-network clarity only.
+    expose:
+      - "8080"
+    volumes:
+      # Unified production data directory. Override HERMES_DATA_DIR for tests (temp dir).
+      - "${HERMES_DATA_DIR:-/var/lib/hermes-cloud}:/data"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/api/hermes/v1/health').status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

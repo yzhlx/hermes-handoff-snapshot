@@ -1,0 +1,12 @@
+.account-page { display: grid; gap: 14px; }
+.account-block { display: grid; gap: 10px; }
+.account-block h2 { margin: 0; font-size: 15px; }
+.account-block label { display: grid; gap: 6px; font-size: 13px; }
+.account-block input { width: 100%; min-height: 38px; }
+.account-block code { padding: 1px 5px; border-radius: 6px; background: var(--canvas); font-size: 12px; }
+.account-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.account-export-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13px; }
+.account-export-list li { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.account-warning { margin: 0; padding: 8px 10px; border-left: 3px solid #a4442f; border-radius: 8px; background: var(--canvas); font-size: 13px; }
+.account-final summary { cursor: pointer; font-size: 13px; }
+.account-final { display: grid; gap: 8px; }

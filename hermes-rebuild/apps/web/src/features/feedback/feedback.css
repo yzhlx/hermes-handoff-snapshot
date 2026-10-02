@@ -1,0 +1,107 @@
+/*
+ * 结束反馈样式：对齐参考图 Hermes结束反馈.png 的编号步骤版式
+ * ------------------------------------------------------------------
+ * 结构（见 SessionFeedback.tsx / ReflectionEditor.tsx）：
+ *   .session-feedback
+ *     .feedback-flow
+ *       .feedback-step           ① 本次反馈（真实反馈编辑器）
+ *       .feedback-step.problem-capture  ② 记录本次做过的题（表单 + 附件 + 已保存题目）
+ * 编号用 CSS 计数器生成：不改 JSX 文案、不参与可访问名称计算。
+ * 只引用 shared/ui/tokens.css 的语义令牌，不写死颜色。
+ */
+
+.feedback-flow {
+  display: grid;
+  gap: var(--space-6);
+  counter-reset: feedback-step;
+}
+
+.feedback-step {
+  position: relative;
+  display: grid;
+  gap: var(--space-3);
+  padding-left: var(--space-9);
+  counter-increment: feedback-step;
+}
+
+/* 参考图的圆形序号：底色是选中态浅绿，数字用强调绿 */
+.feedback-step::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  color: var(--text-accent);
+  background: var(--bg-nav-active);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  content: counter(feedback-step);
+}
+
+.feedback-step > h3,
+.feedback-step > h4 {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-medium);
+}
+
+.feedback-step > .section-label {
+  margin-bottom: 0;
+}
+
+/* 反馈表单：参考图里正文输入区明显更大 */
+.reflection-editor {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.reflection-editor textarea {
+  min-height: 120px;
+}
+
+.reflection-editor form > button[type="submit"] {
+  justify-self: end;
+  min-height: var(--control-height);
+}
+
+/* 题目块的底部操作行：说明占满一行，主操作靠右 */
+.problem-capture__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.problem-capture__actions > p,
+.problem-capture__actions > .feedback {
+  flex: 1 1 100%;
+  margin: 0;
+}
+
+.problem-capture__actions > button {
+  margin-left: auto;
+  min-height: var(--control-height);
+}
+
+@media (max-width: 600px) {
+  .feedback-step {
+    padding-left: var(--space-8);
+  }
+
+  .reflection-editor form > button[type="submit"],
+  .problem-capture__actions > button {
+    justify-self: stretch;
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feedback-flow * {
+    transition: none;
+  }
+}

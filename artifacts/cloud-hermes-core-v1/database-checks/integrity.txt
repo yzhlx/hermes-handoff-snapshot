@@ -1,0 +1,8 @@
+PRAGMA integrity_check:
+ok
+
+PRAGMA foreign_key_check (should be empty):
+(none — no FK violations)
+
+events total rows: 5
+append-only triggers present: events_no_update, events_no_delete

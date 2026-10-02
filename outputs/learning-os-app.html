@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>学习 OS</title>
+  <link rel="stylesheet" href="learning-os-app.css">
+  <link rel="stylesheet" href="learning-os-refresh.css">
+  <link rel="stylesheet" href="learning-os-wa.css">
+  <link rel="stylesheet" href="learning-os-momentum.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#today" aria-label="Hermes Learning OS，返回今日"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 2L4.5 13.5h5.5L9 22l8.5-11.5h-5.5L13 2z" fill="currentColor"/></svg></span><span>Hermes<small>Learning OS</small></span></a>
+      <nav aria-label="主导航" class="main-nav">
+        <button data-page="today" data-icon="◌" aria-label="今日" data-priority="primary" class="active">今日</button>
+        <button data-page="review" data-icon="✓" aria-label="每日复习" data-priority="primary">每日复习<span class="nav-badge" id="navReviewBadge" hidden></span></button>
+        <button data-page="errors" data-icon="◇" aria-label="错题专栏" data-priority="primary">错题专栏</button>
+        <button data-page="plan" data-icon="□" aria-label="周计划" data-priority="primary">周计划</button>
+        <div class="nav-sep" aria-hidden="true">更多</div>
+        <button data-page="chat" data-icon="✦" aria-label="AI 对话" class="nav-more">AI 对话</button>
+        <button data-page="records" data-icon="◫" aria-label="学习记录" class="nav-more">学习记录</button>
+        <button data-page="settings" data-icon="⊙" aria-label="设置" class="nav-more">设置</button>
+      </nav>
+      <div class="sidebar-footer"><p class="service-status"><i></i>本地服务</p><button data-page="settings" class="profile-button" type="button"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" fill="currentColor"/></svg></span><b>学习者</b><small>本机资料库</small></button></div>
+    </aside>
+    <main class="content">
+      <header class="topbar"><div><span id="todayLabel" hidden></span><h1 id="pageTitle">今日</h1><p class="page-status" id="pageStatus"></p></div><div class="topbar-actions"><span id="topbarDate" class="date-chip"></span><button id="statusButton" class="quiet-button">记录状态</button></div></header>
+      <section id="notice" class="notice" role="status" aria-live="polite" hidden></section>
+
+      <section class="page active" data-view="today">
+        <div class="today-dashboard">
+          <section class="today-timeline" aria-label="今日学习时间轴">
+            <div class="timeline-header"><div><h2>今天的学习</h2><p class="page-summary" id="timelineSummary">今天还没有安排。</p></div><button class="icon-button" type="button" aria-label="编辑计划" data-goto="plan">↗</button></div>
+            <p id="timelineDate" class="timeline-date"></p>
+            <div id="todayTimeline" class="timeline-events"><article class="timeline-event empty"><strong>正在读取今天的节奏</strong><small>学习安排会显示在这里。</small></article></div>
+            <p class="timeline-footnote">节律优先于堆叠。为今天保留缓冲时间。</p>
+          </section>
+
+          <section class="today-workspace" aria-label="今日工作台">
+            <div class="today-greeting"><p class="section-kicker">LEARNING DESK</p><h2>Good evening.</h2><p>今天的每一步，都会沉淀为长期能力。</p></div>
+            <section class="mission-section" aria-labelledby="missionTitle"><div class="section-heading"><div><span class="section-kicker">TODAY'S MISSION</span><h2 id="missionTitle">今日核心任务</h2></div><button class="text-button" data-goto="plan">调整计划</button></div><p class="mission-intro">先完成最重要的一件事，再决定下一步。</p><div id="todayCurrent" class="current-task" aria-live="polite"><span class="mission-index" aria-hidden="true">—</span><div class="mission-body"><p class="eyebrow">TODAY'S MISSION · 等待安排</p><h2>先安排今天最重要的一步</h2><p class="task-meta">正在读取今日任务；如尚未安排，可以直接新增。</p><div class="mission-footer"><span class="mission-progress">先完成，再扩展</span><button class="primary" onclick="showPage('plan')">新增任务</button></div></div></div><div class="next-block"><div class="panel-heading"><h3>候选任务</h3><span class="task-meta">为缓冲留出空间 · 不超过 3 项</span></div><div id="nextTasks" class="list"><p class="empty">正在读取候选任务。</p></div></div></section>
+            <section class="daily-metrics" aria-label="今日学习指标"><div><small>完成进度</small><strong id="todayProgress">0 / 0</strong><span>今日安排</span></div><div><small>剩余任务</small><strong id="remainingTime">--</strong><span>可弹性调整</span></div><div><small>错题复习</small><strong id="reviewProgress">0 / 5</strong><span>每日目标</span></div><div><small>专注时间</small><strong id="focusTime">0 min</strong><span>计划总量</span></div></section>
+            <section class="today-notes"><article class="status-note"><div class="panel-heading"><div><span class="section-kicker">LEARNING STATE</span><h2>当前状态</h2></div><button class="text-button" data-goto="status">更新</button></div><div id="statusSummary" class="status-summary"></div></article><article class="learning-prompt"><span class="section-kicker">NEXT SMALL STEP</span><p>在新的输入之前，先处理最接近遗忘边缘的内容。</p></article></section>
+          </section>
+
+          <aside class="hermes-panel" aria-label="Hermes AI 学习助手"><div class="hermes-heading"><div><span class="hermes-orbit" aria-hidden="true"><i></i></span><div><h2>Hermes AI</h2><p>Learning Intelligence</p></div></div><span class="ai-live"><i></i>在线</span></div><section class="ai-insight"><span class="section-kicker">TODAY'S INSIGHT</span><h3 id="aiInsightTitle">从小步回忆开始</h3><p id="aiInsightText">Hermes 会结合今天的任务与复习状态，为你保留可执行的下一步。</p><ul id="aiEvidence" class="ai-evidence"><li>等待今日学习数据</li></ul></section><section class="ai-actions" aria-label="Hermes 快捷操作"><button class="ai-action" type="button" aria-label="生成建议" data-goto="plan">生成今日建议 <span>↗</span></button><button class="ai-action" type="button" aria-label="开始错题复习" data-goto="review">开始错题复习 <span>↗</span></button><button class="ai-action" type="button" aria-label="分析薄弱章节" data-goto="errors">分析薄弱章节 <span>↗</span></button></section><form id="aiComposer" class="ai-composer"><label for="aiPrompt">向 Hermes 询问你的学习状态</label><div><input id="aiPrompt" name="prompt" autocomplete="off" placeholder="例如：我现在适合复习什么？"><button type="submit" aria-label="打开 AI 对话并带入问题">↑</button></div><p>Enter to ask · 将在 AI 对话中继续</p></form></aside>
+        </div>
+      </section>
+
+      <section class="page" data-view="plan">
+        <header class="page-heading planner-page-heading">
+          <div class="page-heading-text"></div>
+          <p class="page-summary">先安排两项核心任务，再为调整与回忆留出缓冲。</p>
+        </header>
+        <div class="planner-layout">
+          <article class="panel planner-form-panel" aria-labelledby="planFormTitle">
+            <div class="planner-panel-header"><div><span class="section-kicker">ADD ONE INTENTIONAL TASK</span><h3 id="planFormTitle">新增任务</h3></div><span class="planner-rule">核心 ≤ 2 · 候选 ≤ 3</span></div>
+            <p class="planner-panel-intro">写下可完成的一步，而不是堆满待办。保存失败时，已填写的内容会保留。</p>
+            <form id="taskForm" class="form-grid planner-form" aria-describedby="taskFormHint taskFormStatus">
+              <label class="form-control-label" for="taskTitle"><span>任务标题</span><input id="taskTitle" name="title" required placeholder="例如：卷积主动回忆"></label>
+              <div class="planner-field-row">
+                <label class="form-control-label" for="taskStudyDate"><span>安排日期</span><input id="taskStudyDate" name="study_date" type="date" required></label>
+                <label class="form-control-label" for="taskPriority"><span>优先级</span><select id="taskPriority" name="priority"><option value="high">高优先级</option><option value="medium" selected>中优先级</option><option value="low">低优先级</option></select></label>
+              </div>
+              <label class="form-control-label" for="taskMinutes"><span>预计时长</span><input id="taskMinutes" name="estimated_minutes" type="number" min="1" inputmode="numeric" placeholder="例如：35"></label>
+              <label class="form-control-label" for="taskNotes"><span>学习说明 <em>可选</em></span><textarea id="taskNotes" name="notes" placeholder="写下具体范围、复习方式或开始条件"></textarea></label>
+              <div class="planner-form-footer"><div><p id="taskFormHint" class="form-hint">保存后会显示在所选日期的学习节奏中。</p><p id="taskFormStatus" class="form-status" role="status" aria-live="polite"></p></div><button class="primary" type="submit">加入计划</button></div>
+            </form>
+          </article>
+          <article class="panel planner-day-panel" aria-labelledby="planDayTitle">
+            <div class="planner-day-header"><div><span class="section-kicker">DAILY RHYTHM</span><h3 id="planDayTitle">当天任务</h3></div><label class="planner-date-control" for="taskDate"><span>查看日期</span><input id="taskDate" type="date"></label></div>
+            <p class="planner-day-intro">当前日期的任务会按已有计划显示；状态与时长保持真实记录。</p>
+            <div id="taskList" class="list planner-list" role="list" aria-live="polite"></div>
+            <p class="planner-day-footnote">为意外、休息和回忆留一点余地。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" data-view="errors">
+        <header class="page-heading notebook-page-heading"><div class="page-heading-text"></div><p class="page-summary">先保留题目与作答证据，再让 Hermes 协助厘清下一步。</p></header>
+        <div class="notebook-layout">
+          <article class="panel evidence-sheet" aria-labelledby="errorFormTitle">
+            <div class="notebook-sheet-header"><div><span class="section-kicker">CAPTURE THE EVIDENCE</span><h3 id="errorFormTitle">收录一题</h3></div><span class="notebook-note">先记录，再判断</span></div>
+            <p class="notebook-intro">错题不是待办；它是一段可回看的学习证据。信息不足时，Hermes 会明确告诉你还需要什么。</p>
+            <form id="errorForm" class="form-grid evidence-form" aria-describedby="errorFormHint errorFormStatus">
+              <div class="evidence-meta-grid">
+                <label class="form-control-label" for="errorTitle"><span>标题或题号 <em>可选</em></span><input id="errorTitle" name="title" placeholder="例如：卷积的定义域"></label>
+                <label class="form-control-label" for="errorSubject"><span>学科</span><input id="errorSubject" name="subject" value="高等数学" required></label>
+                <label class="form-control-label" for="errorChapter"><span>章节 <em>可选</em></span><input id="errorChapter" name="chapter" placeholder="例如：卷积积分"></label>
+                <label class="form-control-label" for="errorPriority"><span>复习优先级</span><select id="errorPriority" name="priority"><option value="high">高优先级</option><option value="medium" selected>中优先级</option><option value="low">低优先级</option></select></label>
+              </div>
+              <div class="evidence-fields">
+                <label class="form-control-label evidence-field" for="errorProblem"><span><b>题目证据</b><em>可选</em></span><textarea id="errorProblem" name="problem_text" placeholder="输入原题文本；图片/PDF 识别结果会作为可编辑草稿填入这里"></textarea></label>
+                <label class="form-control-label evidence-field" for="errorWork"><span><b>你的作答</b><em>最有帮助</em></span><textarea id="errorWork" name="work_text" placeholder="写下你当时的计算、判断或卡住的位置"></textarea></label>
+                <label class="form-control-label evidence-field" for="errorAnswer"><span><b>参考答案</b><em>可选</em></span><textarea id="errorAnswer" name="correct_answer" placeholder="记录正确答案或关键结论"></textarea></label>
+                <label class="form-control-label evidence-field" for="errorExplanation"><span><b>解析与批注</b><em>可选</em></span><textarea id="errorExplanation" name="explanation" placeholder="补充答案解析、课堂笔记或下次检查点"></textarea></label>
+              </div>
+              <div class="evidence-form-footer"><div><p id="errorFormHint" class="form-hint">保存后，原始证据与元信息会保留在本机错题笔记中。</p><p id="errorFormStatus" class="form-status" role="status" aria-live="polite"></p></div><button class="primary" type="submit">保存错题</button></div>
+            </form>
+          </article>
+          <aside class="panel notebook-index" aria-labelledby="errorListTitle">
+            <div class="notebook-index-header"><div><span class="section-kicker">REVIEW NOTEBOOK</span><h3 id="errorListTitle">待复盘条目</h3></div><button class="text-button" data-goto="review">进入复习</button></div>
+            <p class="notebook-index-intro">这里显示已有错题的真实记录。AI 推断只在本次分析完成后显示，不会伪装成原始证据。</p>
+            <div id="errorList" class="list error-note-list" role="list" aria-live="polite"></div>
+            <p class="notebook-index-footnote">先处理证据完整、距离复习最近的一题。</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="page" data-view="review"><header class="page-heading review-page-heading"><div class="page-heading-text"></div><div class="review-page-action"><p>一次只复盘一题，再如实记录结果。</p><button id="refreshReview" class="quiet-button">刷新题目</button></div></header><section class="review-page-context" aria-label="每日复习说明"><p>结果不是“看过答案”。请区分已掌握、部分掌握、仍不会、粗心和暂时跳过。</p></section><div id="reviewList" class="review-list" aria-live="polite"></div></section>
+
+      <section class="page" data-view="chat"><div class="page-heading"><div class="page-heading-text"></div><button id="newChat" class="quiet-button">新建对话</button></div><div class="chat-layout"><aside class="panel chat-list" aria-label="对话历史"><div class="chat-history-heading"><span class="section-kicker">SAVED THREADS</span><p>学习问题会保存在本机。</p></div><div id="chatList" class="chat-history-items"><p class="empty">正在读取对话历史。</p></div></aside><article class="panel chat-panel" aria-labelledby="chatMentorTitle"><header class="chat-mentor-heading"><div><span class="hermes-orbit" aria-hidden="true"><i></i></span><div><span class="section-kicker">HERMES AI</span><h3 id="chatMentorTitle">学习导师</h3></div></div><span id="chatStatus" class="chat-status" role="status" aria-live="polite">等待你的问题</span></header><div id="messages" class="messages" role="log" aria-live="polite" aria-label="学习对话"><div class="chat-empty-state"><span class="section-kicker">START WITH ONE QUESTION</span><h3>今天我们先解决最重要的一件事。</h3><p>新建对话后，可以保存学习问题、错题关联和任务咨询。</p></div></div><form id="chatForm" class="chat-compose"><label for="chatContent">向 Hermes 说明你正在学习什么</label><div class="chat-compose-field"><textarea id="chatContent" name="content" placeholder="例如：我现在适合先复习卷积，还是继续做计算题？" required></textarea><button class="primary" type="submit">发送</button></div><p>Enter 换行 · 发送后会保留在当前对话中</p></form></article></div></section>
+
+      <section class="page" data-view="records"><header class="page-heading records-page-heading"><div class="page-heading-text"></div><p class="page-summary">只展示已经保存的学习证据；数字用于决定下一次复习，不用于制造压力。</p></header><section class="records-intro" aria-label="学习记录说明"><span class="section-kicker">READ THE SIGNAL, NOT JUST THE NUMBER</span><p>从学科、章节和已有错误类型中寻找需要回看的线索。没有数据时，系统会如实说明，而不会生成趋势。</p></section><div class="records-grid"><article class="panel statistics-panel" aria-labelledby="subjectStatsTitle"><header><span class="section-kicker">SUBJECTS</span><h3 id="subjectStatsTitle">按学科</h3><p>哪些学习范围已留下复盘记录。</p></header><div id="subjectStats" class="list statistics-list" role="list" aria-live="polite"></div></article><article class="panel statistics-panel" aria-labelledby="chapterStatsTitle"><header><span class="section-kicker">CHAPTERS</span><h3 id="chapterStatsTitle">按章节</h3><p>哪些概念值得安排下一次回忆。</p></header><div id="chapterStats" class="list statistics-list" role="list" aria-live="polite"></div></article><article class="panel statistics-panel" aria-labelledby="typeStatsTitle"><header><span class="section-kicker">ERROR SIGNALS</span><h3 id="typeStatsTitle">错误类型</h3><p>仅统计已有记录或 AI 分析留下的标签。</p></header><div id="typeStats" class="list statistics-list" role="list" aria-live="polite"></div></article></div></section>
+
+      <section class="page" data-view="settings"><header class="page-heading settings-page-heading"><div class="page-heading-text"></div><p class="page-summary">AI 配置与学习记录默认保留在本机；密钥不进入 SQLite、页面或浏览器存储。</p></header>
+      <article class="panel account-note" aria-label="账号说明"><header><span class="section-kicker">ACCOUNT</span><h3>关于账号</h3></header><p>本学习 OS 采用受信任设备门禁，账号由管理员开通或邀请，<strong>暂不提供自助注册</strong>。如需开通账号，请联系管理员获取登录方式。</p></article><div class="settings-layout"><article class="panel ai-settings-sheet" aria-labelledby="aiSettingsTitle"><header class="settings-sheet-header"><div><span class="section-kicker">HERMES CONNECTION</span><h3 id="aiSettingsTitle">AI 配置</h3></div><span class="settings-local-badge">本机优先</span></header><p class="settings-intro">服务地址、协议、模型和超时可在本机调整。API 密钥仅交给 Windows 凭据管理器保存。</p><form id="aiSettingsForm" class="form-grid ai-settings-form" aria-describedby="aiConfigStatus aiSaveStatus"><label class="form-control-label" for="aiBaseUrl"><span>AI 服务地址</span><input id="aiBaseUrl" name="base_url" type="url" placeholder="https://... 或 https://.../v1/chat/completions" required></label><div class="ai-settings-row"><label class="form-control-label" for="aiProtocol"><span>协议</span><select id="aiProtocol" name="protocol"><option value="chat_completions">OpenAI 兼容 Chat Completions</option><option value="responses">Responses</option></select></label><label class="form-control-label" for="aiModel"><span>模型</span><input id="aiModel" name="model" placeholder="gemini-2.5-flash" required></label></div><label class="form-control-label" for="aiTimeout"><span>超时（秒）</span><input id="aiTimeout" name="timeout_seconds" type="number" min="5" max="120" value="30" required></label><section class="credential-field" aria-labelledby="credentialFieldTitle"><div><span class="section-kicker">CREDENTIAL</span><h4 id="credentialFieldTitle">API 密钥</h4><p>保存后只显示是否已配置及末四位，不会回显完整密钥。</p></div><label class="form-control-label" for="aiApiKey"><span>输入或更换密钥 <em>可选</em></span><input id="aiApiKey" name="api_key" type="password" autocomplete="new-password" placeholder="首次配置或需要更换时填写"></label><label class="check-row"><input name="clear_api_key" type="checkbox"> <span>清除已保存的密钥</span></label></section><p id="aiConfigStatus" class="config-status" role="status" aria-live="polite">尚未读取配置</p><p id="aiSaveStatus" class="form-status" role="status" aria-live="polite"></p><footer class="settings-form-footer"><span>保存不会发起 AI 调用。</span><button class="primary" type="submit">保存 AI 配置</button></footer></form></article><article class="panel app-lifecycle-sheet" aria-labelledby="exitAppTitle"><header class="settings-sheet-header"><div><span class="section-kicker">APPLICATION</span><h3 id="exitAppTitle">退出应用</h3></div><span class="settings-local-badge">本机</span></header><p class="settings-intro">学习 OS 在本机以后台服务方式运行。退出后，浏览器页面需手动关闭；未提交的手写草稿已保存在本地，下次打开可恢复。</p><div class="exit-action"><button id="exitAppButton" class="danger" type="button">退出学习 OS</button><p id="exitStatus" class="form-status" role="status" aria-live="polite" hidden></p></div></article><aside class="settings-side-column"><article class="panel connection-card" aria-labelledby="connectionTitle"><span class="section-kicker">CONNECTION CHECK</span><h3 id="connectionTitle">测试 AI 连接</h3><p>测试会沿用当前正式 Provider 与协议，确认配置是否可以完成最小请求。</p><button id="connectionTest" class="quiet-button" type="button">测试 AI 连接</button><p id="connectionTestStatus" class="form-status" role="status" aria-live="polite">尚未执行测试。</p></article><article class="panel privacy-card"><span class="section-kicker">DATA & PRIVACY</span><h3>数据与隐私</h3><p>任务、错题、复习、状态和对话默认仅保存在本机 SQLite。导出和清除操作仍属于后续数据工具范围。</p><a href="learning-os-ui-prototype.html">打开旧版手写复测原型</a></article></aside></div></section>
+      <dialog id="quickErrorDialog"><form id="quickErrorForm" class="panel form-grid"><div class="panel-heading"><h2>图片快速录入错题</h2><button id="closeQuickError" class="text-button" type="button">关闭</button></div><label>选择原题、作答、答案或解析文件 <input id="errorImages" type="file" accept="image/png,image/jpeg,image/webp,application/pdf,.pdf" multiple required></label><button id="extractErrorImages" class="primary" type="button">识别文件并填入</button><p id="quickErrorHint" class="task-meta"></p></form></dialog>
+    </main>
+  </div>
+  <dialog id="statusDialog" class="status-dialog"><form id="statusForm" aria-describedby="statusFormHint statusFormStatus"><header class="status-dialog-header"><div><span class="section-kicker">LEARNING STATE</span><h2>记录当前状态</h2></div><button id="closeStatusDialog" class="text-button" type="button">关闭</button></header><p id="statusFormHint" class="status-dialog-intro">这是一份学习节奏记录，不是诊断。它只用于帮助今天的任务更贴合你的可用精力。</p><div class="status-scale-grid"><label for="statusMood"><span>心情</span><select id="statusMood" name="mood"><option value="">未记录</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label><label for="statusEnergy"><span>精力</span><select id="statusEnergy" name="energy"><option value="">未记录</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label><label for="statusStress"><span>压力</span><select id="statusStress" name="stress"><option value="">未记录</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label></div><div class="status-checks"><label><input name="fatigued" type="checkbox"> <span>我感到疲劳</span></label><label><input name="willing_to_continue" type="checkbox" checked> <span>愿意继续学习</span></label></div><label class="status-notes" for="statusNotes"><span>备注 <em>可选</em></span><textarea id="statusNotes" name="notes" placeholder="例如：今天先从低难度回忆开始"></textarea></label><p id="statusFormStatus" class="form-status" role="status" aria-live="polite"></p><footer class="status-dialog-footer"><span>保存后会更新今天的学习建议。</span><button class="primary" type="submit">保存状态</button></footer></form></dialog>
+  <dialog id="exitConfirmDialog" class="exit-dialog"><div class="exit-dialog-body"><span class="section-kicker">CONFIRM EXIT</span><h2>退出学习 OS？</h2><p>确认后，本机后台服务会停止。正在编辑但未提交的手写草稿已保存在本地（浏览器 localStorage），下次打开应用可继续恢复。</p><footer><button id="cancelExit" class="quiet-button" type="button">取消</button><button id="confirmExit" class="danger" type="button">确认退出</button></footer></div></dialog>
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <section class="handwriting-workspace modal" aria-label="手写画布工作区">
+      <header class="handwriting-workspace-head">
+        <div><p class="section-kicker">ACTIVE RECALL</p><h2 id="modalTitle">手写画布</h2></div>
+        <button class="icon-button" id="closeModal" type="button" aria-label="关闭手写画布">×</button>
+      </header>
+      <div class="workspace-body">
+        <section class="canvas-question"><span class="question-index">01</span><p>先写下你的推导、判断或卡住的位置；原始笔迹会保留为学习证据。</p><span>本地草稿</span></section>
+        <div class="answer-layout">
+          <section class="answer-main" aria-label="作答区">
+            <div class="answer-toolbar">
+              <div class="toolbar-group">
+                <div class="segmented" aria-label="作答方式"><button class="active" id="inputTabHandwrite" type="button" aria-pressed="true">手写</button><button id="inputTabText" type="button" aria-pressed="false">键盘</button></div>
+                <span class="tool-divider"></span>
+                <button class="icon-button tool-button" id="drawTool" type="button" aria-pressed="true" title="画笔">画笔</button>
+                <button class="icon-button tool-button" id="eraserTool" type="button" aria-pressed="false" title="橡皮擦">橡皮擦</button>
+                <button class="icon-button tool-button" id="panTool" type="button" aria-pressed="false" title="移动画布">移动</button>
+                <input class="stroke-size" id="strokeSize" type="range" min="2" max="9" step="0.5" value="3.5" aria-label="笔画粗细">
+                <button class="icon-button" id="undoStroke" type="button" disabled aria-label="撤销">↶</button><button class="icon-button" id="redoStroke" type="button" disabled aria-label="重做">↷</button>
+                <span class="tool-divider"></span><button class="icon-button" id="zoomOut" type="button" aria-label="缩小">−</button><span class="zoom-level" id="zoomLevel">100%</span><button class="icon-button" id="zoomIn" type="button" aria-label="放大">+</button><button class="icon-button tool-button" id="resetView" type="button">复位</button><button class="icon-button" id="fitContent" type="button" aria-label="适应内容">⌗</button><button class="icon-button" id="moreCanvasActions" type="button" aria-label="更多画布操作">⋯</button>
+              </div>
+              <div class="page-control" aria-label="页面控制"><button class="icon-button" id="previousPage" type="button" disabled aria-label="上一页">‹</button><span class="page-indicator" id="pageIndicator">1 / 1</span><button class="icon-button" id="nextPage" type="button" disabled aria-label="下一页">›</button><button class="icon-button" id="addPage" type="button" aria-label="新增一页">＋</button><button class="icon-button" id="deletePage" type="button" disabled aria-label="删除本页">−</button></div>
+              <div class="canvas-menu" id="canvasMenu" hidden><button id="clearPage" type="button">清空本页</button><button id="exportPng" type="button">导出全部 PNG</button><button id="exportViewPng" type="button">导出当前视图</button><button id="exportJson" type="button">导出笔迹 JSON</button></div>
+            </div>
+            <div id="handwritingPanel"><div class="canvas-wrap" id="canvasWrap"><canvas id="handwritingCanvas" tabindex="0" aria-label="手写作答画布"></canvas><div class="canvas-empty" id="canvasEmpty">用手写笔开始作答</div><div class="clear-confirm" id="clearConfirm" role="alert"><span>清空本页全部笔迹？</span><button id="confirmClear" type="button">确认清空</button><button id="cancelClear" type="button">取消</button></div></div></div>
+            <div class="text-answer-panel" id="textAnswerPanel"><label for="answer">键盘作答</label><textarea id="answer" placeholder="用自己的话记录思路，不需要先整理成标准答案。"></textarea></div>
+            <footer class="answer-footer"><button class="recognize-button" id="recognizeAnswer" type="button">AI 识别核对</button><span class="saved-state" id="savedState">本地暂存 · 尚未同步</span></footer>
+          </section>
+          <aside class="recognition-panel" id="recognitionPanel" aria-label="AI 识别核对" hidden><header class="recognition-head"><div><h3>AI 识别核对</h3><p>原始笔迹始终保留。</p></div><span class="service-status" id="recognitionServiceState">本地代理</span></header><div class="recognition-result" id="recognitionResult"><p class="status-box" id="recognitionStatus">尚未连接识别服务。</p><dl class="recognition-metrics"><dt>模型</dt><dd id="recognitionModel">—</dd><dt>置信度</dt><dd id="recognitionConfidence">—</dd><dt>请求 ID</dt><dd id="recognitionRequestId">—</dd><dt>待核对片段</dt><dd id="recognitionUncertainCount">—</dd></dl><label for="recognizedText">识别文本 / 人工修订</label><textarea id="recognizedText"></textarea><div class="recognition-details"><section><h4>关键公式</h4><ul id="recognitionFormulas"><li>—</li></ul></section><section><h4>图示记录</h4><ul id="recognitionDiagrams"><li>—</li></ul></section><section><h4>待核对</h4><ul id="recognitionUncertain"><li>—</li></ul></section></div><label class="confirmation"><input id="transcriptConfirmed" type="checkbox"><span>我已核对转写内容，同意将其与原始笔迹一并作为 Evidence。</span></label></div></aside>
+          <aside class="assessment-drawer" id="assessmentDrawer" aria-label="Assessment 结果" hidden><header class="assessment-head"><div><h3>评估结果</h3><p id="assessmentStatusText">正在评估当前作答</p></div><strong id="assessmentStateChange">F2 → —</strong></header><p class="assessment-summary" id="assessmentSummary">Evidence 已保存，正在生成 Assessment。</p><section class="assessment-section"><h4>正确点</h4><ul id="assessmentCorrect"><li>等待评估</li></ul></section><section class="assessment-section"><h4>遗漏点</h4><ul id="assessmentMissing"><li>等待评估</li></ul></section><section class="assessment-section"><h4>公式反馈</h4><ul id="assessmentFormulas"><li>等待评估</li></ul></section><dl class="assessment-meta"><dt>Evidence</dt><dd id="assessmentEvidenceId">—</dd><dt>Assessment</dt><dd id="assessmentId">—</dd></dl><div class="drawer-actions"><button class="primary" id="answerAgain" type="button">再答一次</button><button class="quiet-button" id="retryAssessment" type="button" hidden>重试评估</button><button class="quiet-button" id="closeAssessment" type="button">继续查看原答案</button></div></aside>
+        </div>
+        <p class="answer-error" id="answerError" role="alert">请先手写或输入作答内容。</p>
+        <footer class="modal-actions"><span id="submissionStatus">提交后先持久化 Evidence，再生成 Assessment。</span><button class="primary" id="submitAnswer" type="button">提交为 Evidence</button></footer>
+      </div>
+    </section>
+  </div>
+  <div class="handwriting-toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="learning-os-app.js"></script>
+  <script src="learning-os-ui-fix.js"></script>
+  <script src="learning-os-wrong-answers.js"></script>
+  <script src="learning-os-momentum.js"></script>
+  <script src="learning-os-canvas-model.js"></script>
+  <script src="learning-os-handwriting-workspace.js"></script>
+</body>
+</html>

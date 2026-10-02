@@ -1,0 +1,58 @@
+name: hermes-foundation
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: hermes
+      POSTGRES_USER: hermes
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in infra/.env}
+    volumes:
+      - hermes_pg:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hermes -d hermes"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.api
+    environment: &api_environment
+      HERMES_DATABASE_URL: postgresql+psycopg://hermes:${POSTGRES_PASSWORD}@postgres:5432/hermes
+      HERMES_ENVIRONMENT: development
+      HERMES_ALLOWED_ORIGIN: http://127.0.0.1:8085
+      HERMES_COOKIE_SECURE: "false"
+      HERMES_ATTACHMENT_STORAGE: local
+      HERMES_ATTACHMENT_LOCAL_ROOT: /var/lib/hermes/private
+    volumes:
+      - hermes_attachments:/var/lib/hermes/private
+    depends_on:
+      postgres:
+        condition: service_healthy
+  attachment-worker:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.api
+    command: ["python", "-m", "hermes_api.attachment_worker", "--poll-seconds", "2"]
+    environment: *api_environment
+    volumes:
+      - hermes_attachments:/var/lib/hermes/private
+    mem_limit: 512m
+    pids_limit: 64
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    depends_on:
+      postgres:
+        condition: service_healthy
+  web:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.web
+    ports:
+      - "127.0.0.1:8085:8080"
+    depends_on:
+      - api
+volumes:
+  hermes_pg:
+  hermes_attachments:

@@ -1,0 +1,100 @@
+.daily-quote {
+  max-width: 900px;
+  margin: 32px auto 0;
+  padding: 24px 28px;
+  border-radius: 18px;
+  background: #f8f5ef;
+}
+
+.daily-quote-heading,
+.quote-actions,
+.quote-library-item-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.daily-quote-heading { align-items: flex-start; }
+.daily-quote-heading .eyebrow { padding-top: 9px; }
+.daily-quote .quote-library-link,
+.quote-library-link-bottom {
+  min-height: 44px;
+  padding: 8px 12px;
+  border-color: transparent;
+  color: #706d65;
+  background: transparent;
+  font-size: 13px;
+}
+
+.daily-quote-text {
+  max-width: 760px;
+  margin: 12px auto 20px;
+  color: #30312c;
+  font-family: Georgia, "Songti SC", "SimSun", serif;
+  font-size: clamp(19px, 2.1vw, 26px);
+  font-weight: 450;
+  line-height: 1.75;
+  letter-spacing: 0;
+  text-align: center;
+}
+
+.daily-quote-author {
+  display: block;
+  margin: -12px 0 18px;
+  color: #706d65;
+  font-size: 13px;
+  font-style: normal;
+  text-align: center;
+}
+
+.quote-actions { justify-content: center; flex-wrap: wrap; }
+.quote-action { min-height: 44px; padding: 9px 16px; font-size: 13px; }
+.quote-action.selected { border-color: #aab79f; background: #e9eee3; }
+.quote-pending {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 12px;
+  color: #706d65;
+  font-size: 12px;
+}
+.quote-pending p { margin: 0; }
+.quote-pending button { min-height: 44px; padding: 8px 12px; font-size: 12px; }
+.daily-quote-empty { margin: 14px 0 0; font-size: 19px; font-weight: 500; }
+.daily-quote-empty + .muted { margin: 4px 0 10px; font-size: 13px; }
+.daily-quote .feedback { margin-bottom: 0; }
+
+.my-quotes-page {
+  max-width: 900px;
+  margin: 48px auto 0;
+}
+.my-quotes-heading { margin-bottom: 32px; }
+.my-quotes-heading h1 { margin: 8px 0; }
+.my-quotes-heading p { margin: 0; color: #706d65; }
+.quote-library-section { margin: 30px 0 0; }
+.quote-library-section h2 { margin: 0 0 12px; font-size: 20px; }
+.quote-library-list { display: grid; gap: 12px; }
+.quote-library-item {
+  padding: 18px 20px;
+  border: 1px solid #ddd5c9;
+  border-radius: 16px;
+  background: #fcfaf6;
+}
+.quote-library-item > p { margin: 0 0 12px; font-family: Georgia, "Songti SC", "SimSun", serif; font-size: 16px; line-height: 1.75; }
+.quote-library-item-actions { justify-content: flex-start; flex-wrap: wrap; }
+.quote-library-item-actions .muted { font-size: 12px; }
+.quote-library-empty { padding: 16px 0; color: #706d65; font-size: 14px; }
+.quote-library-section .muted { font-size: 13px; }
+
+@media (max-width: 600px) {
+  .daily-quote { margin-top: 24px; padding: 18px 16px; }
+  .daily-quote-text { margin: 14px auto 16px; }
+  .quote-actions { justify-content: flex-start; }
+  .quote-actions button { flex: 1 1 130px; }
+  .my-quotes-page { margin-top: 28px; }
+  .my-quotes-heading { margin-bottom: 24px; }
+  .quote-library-item { padding: 16px; }
+}

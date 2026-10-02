@@ -1,0 +1,151 @@
+/*
+ * 数据驱动卡片层样式（图标底 + 强调色）
+ * ------------------------------------------------------------------
+ * 1. 这里只引用 tokens.css 的语义令牌，不写死颜色；强调色由
+ *    .card-accent--<令牌名> 提供 --card-icon-* 两个变量。
+ * 2. 令牌名来自 features 目录下各 -meta.ts 的元数据映射，与接口 id 解耦：
+ *    新增学科或方法时由稳定推导给出其中一个令牌名，不需要新增 CSS。
+ * 3. 选择器保持在 .card-icon / .card-accent--* 两层，避免复制页面样式。
+ */
+.card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border-radius: var(--radius-sm);
+  background: var(--card-icon-bg, var(--bg-card-muted));
+  color: var(--card-icon-ink, var(--text-secondary));
+  transition: background var(--motion-fast) var(--ease-standard);
+}
+
+.card-icon--sm {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-xs);
+}
+
+.card-icon--sm svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* DESIGN.md §2：学科卡徽章 45×45（参考图 x249..294 / y421..465 实测），图标约 22px。
+   取 44×44 / 圆角 12 / 图标 20px，与 DESIGN 的拟修值一致。 */
+.card-icon--lg {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+
+.card-icon--lg svg {
+  width: 22px;
+  height: 22px;
+}
+
+.card-accent--sage {
+  --card-icon-bg: var(--accent-sage-soft);
+  --card-icon-ink: var(--accent-sage-ink);
+}
+
+.card-accent--lime {
+  --card-icon-bg: var(--accent-lime-soft);
+  --card-icon-ink: var(--accent-lime-ink);
+}
+
+.card-accent--warm {
+  --card-icon-bg: var(--accent-warm-soft);
+  --card-icon-ink: var(--accent-warm-ink);
+}
+
+.card-accent--clay {
+  --card-icon-bg: var(--accent-clay-soft);
+  --card-icon-ink: var(--accent-clay-ink);
+}
+
+.card-accent--indigo {
+  --card-icon-bg: var(--accent-indigo-soft);
+  --card-icon-ink: var(--accent-indigo-ink);
+}
+
+.card-accent--plum {
+  --card-icon-bg: var(--accent-plum-soft);
+  --card-icon-ink: var(--accent-plum-ink);
+}
+
+.card-accent--ink {
+  --card-icon-bg: var(--accent-ink-soft);
+  --card-icon-ink: var(--accent-ink-ink);
+}
+
+/* ------------------------------------------------------------------
+ * 学科徽章卡（DESIGN.md §2）：184×129、gap 12、内边距 13/17/19、
+ * 徽章 44×44 圆角 12、标题 16px、次要行 12px。
+ * 放在卡片层是因为首页与学科空间共用同一组件（SubjectCards.tsx）。
+ * ------------------------------------------------------------------ */
+.subject-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.subject-card {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: var(--space-1);
+  min-height: 118px;
+  padding: 13px 17px 19px;
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  color: var(--text-primary);
+  background: var(--bg-card);
+  text-align: left;
+  transition: border-color var(--motion-fast) var(--ease-standard),
+    background var(--motion-fast) var(--ease-standard);
+}
+
+.subject-card:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: var(--surface-pure);
+  opacity: 1;
+}
+
+.subject-card__name {
+  margin-top: var(--space-1);
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  overflow-wrap: anywhere;
+}
+
+.subject-card__meta {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-tight);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1024px) {
+  .subject-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .subject-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .subject-card {
+    min-height: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-icon,
+  .subject-card {
+    transition: none;
+  }
+}

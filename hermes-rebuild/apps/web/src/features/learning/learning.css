@@ -1,0 +1,112 @@
+/*
+ * 学习现场样式：对齐参考图 Hermes学科空间.png 的版式与留白
+ * ------------------------------------------------------------------
+ * 结构（见 LearningSpace.tsx）：
+ *   .learning-space
+ *     header.learning-hero        暖米色带：eyebrow + 标题 + 说明
+ *     .panel.learning-panel      学习现场 / 下一步表单
+ *       .learning-goal-card      本次学习目标（大输入框）
+ *       .learning-setup-row      学科 + 计时开关
+ *       .session-actions         暂停 / 结束 / 取消
+ * 只引用 shared/ui/tokens.css 的语义令牌，不写死颜色。
+ */
+
+.learning-space {
+  display: grid;
+  gap: var(--space-6);
+}
+
+/* .page-hero 提供米色底与排版（shared/ui/styles.css），这里只放本页特有的布局。 */
+.learning-hero {
+  max-width: none;
+}
+/* 学习现场保持单列（.workspace 的 900px 列宽），表单卡片撑满该列。 */
+.workspace .learning-panel {
+  display: grid;
+  gap: var(--space-5);
+  max-width: none;
+  padding: var(--space-7);
+}
+
+/* 参考图把「本次学习目标」放在卡片里，输入区明显大于普通表单 */
+.learning-goal-card {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-raised);
+}
+
+.learning-goal-card label {
+  gap: var(--space-3);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.learning-goal-card input {
+  height: var(--control-height);
+  border-color: var(--border-subtle);
+  background: var(--bg-input);
+  font-size: var(--text-lg);
+}
+
+.learning-setup-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-5);
+  align-items: end;
+}
+
+.learning-start {
+  min-height: var(--control-height);
+  font-size: var(--text-md);
+}
+
+.learning-space .session-actions {
+  padding-top: var(--space-4);
+  border-top: var(--border-width) solid var(--border-subtle);
+}
+
+.learning-space .session-actions button {
+  min-height: var(--control-height);
+}
+
+@media (min-width: 1024px) {
+  .learning-start {
+    justify-self: start;
+    min-width: 260px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .learning-hero {
+    padding: var(--space-6);
+  }
+
+  .learning-panel {
+    padding: var(--space-6);
+  }
+}
+
+@media (max-width: 600px) {
+  .learning-hero {
+    padding: var(--space-5);
+  }
+
+  .learning-panel {
+    padding: var(--space-5);
+  }
+
+  .learning-goal-card {
+    padding: var(--space-4);
+  }
+
+  .learning-goal-card input {
+    font-size: var(--text-md);
+  }
+
+  .learning-start {
+    width: 100%;
+  }
+}

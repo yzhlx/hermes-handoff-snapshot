@@ -1,0 +1,263 @@
+/*
+ * Hermes 设计令牌层（唯一来源）
+ * ------------------------------------------------------------------
+ * 规则：
+ * 1. 颜色、间距、圆角、字号、阴影、动效、层级只允许在这里定义；
+ *    页面与组件通过 var(--token) 引用，不新增硬编码数值。
+ * 2. 语义令牌（--bg-* / --text-* / --border-* / --accent-*）是组件该用的名字；
+ *    原始色板令牌（--surface-* / --ink-* / --green-*）只用来定义语义令牌。
+ * 3. 兼容别名（--canvas/--panel/--ink/--muted/--border/--sage/--radius/--card）
+ *    保留给尚未迁移的页面样式，值同样指向语义令牌；新代码不要再使用别名。
+ *
+ * 取值依据：
+ * - 背景与强调色取自用户提供的参考图（ui参考图/Hermes*.png）实际采样：
+ *   应用表层 #FBFBF9、卡片 #FDFDFD、画布 #F3F2EF、顶部米色带 #F4F0E7、
+ *   选中态浅绿 #E5F1E2、主操作绿 rgb(49,123,67) = #317B43。
+ * - 文本与状态色沿用 AGENTS.md §7.4 的暖米色系色板。
+ * - 对比度（WCAG 2.1，实测值）：正文 #24241F/#FDFDFD = 15.3:1；
+ *   次级 #706D65/#FDFDFD = 5.1:1；绿底白字 #FFFFFF/#317B43 = 5.2:1；
+ *   选中绿字 #24653A/#E5F1E2 = 6.0:1；绿色强调文本 #317B43/#FDFDFD = 5.1:1。
+ *   --text-tertiary (#857F73/#FDFDFD = 3.9:1) 只用于图标与装饰，
+ *   正文和元信息请使用 --text-secondary 以上。
+ *
+ * 断点约定（CSS 无法自定义 media 查询，页面必须与下面一致）：
+ * 390 / 600 / 768 / 1024 / 1366 像素。
+ */
+
+:root {
+  /* ---------------- 原始色板：表面 ---------------- */
+  --surface-pure: #ffffff;
+  --surface-card: #fdfdfd;
+  --surface-app: #fbfbf9;
+  --surface-canvas: #f3f2ef;
+  --surface-raised: #f8f5ef;
+  --surface-beige: #f4f0e7;
+  --surface-muted: #eee8de;
+  --surface-hover: #f2f1ee;
+  --surface-green-tint: #e5f1e2;
+  --surface-green-tint-strong: #d8ead6;
+  --surface-danger-tint: #f5ece5;
+  --surface-warning-tint: #f7f0e2;
+  --surface-success-tint: #edf3ea;
+  --surface-ai-tint: #efe9e3;
+  --surface-scrim: rgba(35, 33, 28, 0.35);
+
+  /* ---------------- 原始色板：文本 ---------------- */
+  --ink-900: #24241f;
+  --ink-800: #30312c;
+  --ink-700: #4a4842;
+  --ink-600: #706d65;
+  --ink-500: #857f73;
+  --ink-400: #a09a8e;
+  --ink-050: #f8f5ee;
+
+  /* ---------------- 原始色板：边框 ---------------- */
+  --line-strong: #d8d2c6;
+  --line-default: #e6e1d8;
+  --line-subtle: rgba(68, 61, 50, 0.1);
+  --line-focus: #8c7663;
+
+  /* ---------------- 原始色板：强调与状态 ---------------- */
+  --green-700: #24653a;
+  --green-600: #317b43;
+  --green-650: #2a6f3b;
+  --lime-400: #cbd58d;
+  --sage-400: #aab79f;
+  --warm-400: #b59574;
+  --ai-500: #8c7663;
+  --success-500: #7f9676;
+  --warning-500: #be9b5d;
+  --danger-500: #ad756b;
+  --danger-700: #784c43;
+  --accent-ink: #30312c;
+
+  /* ---------------- 语义令牌：背景 ---------------- */
+  --bg-canvas: var(--surface-canvas);
+  --bg-app: var(--surface-app);
+  --bg-topbar: rgba(251, 251, 249, 0.92);
+  --bg-sidebar: var(--surface-app);
+  --bg-panel: var(--surface-card);
+  --bg-card: var(--surface-card);
+  --bg-card-muted: var(--surface-muted);
+  --bg-raised: var(--surface-raised);
+  --bg-input: var(--surface-pure);
+  --bg-hero: var(--surface-beige);
+  /* hero 分层（参考图 x700 纵向实测：顶部 #F3EEE6 → 中部 #EFEBE2 → 底部 #EAE6DA）。
+   * 参考图 hero 是实景照片（窗边绿植 + 书堆 + 马克杯），素材本批不可得，
+   * 因此用「色带分层 + 极淡纹理 + 边缘内描边」做出体积，禁止退回纯平米色。 */
+  --bg-hero-top: #f3eee6;
+  --bg-hero-mid: #efebe2;
+  --bg-hero-bottom: #eae6da;
+  --hero-texture: repeating-linear-gradient(45deg, rgba(140, 118, 99, 0.035) 0 1px, transparent 1px 6px);
+  --hero-inner-border: inset 0 0 0 1px rgba(68, 61, 50, 0.06);
+  --layout-hero-height: 207px;
+  --bg-nav-hover: var(--surface-hover);
+  --bg-nav-active: var(--surface-green-tint);
+  --bg-nav-active-strong: var(--surface-green-tint-strong);
+  --bg-danger-soft: var(--surface-danger-tint);
+  --bg-warning-soft: var(--surface-warning-tint);
+  --bg-success-soft: var(--surface-success-tint);
+  --bg-accent-soft: var(--surface-green-tint);
+  --bg-ai-soft: var(--surface-ai-tint);
+  --bg-scrim: var(--surface-scrim);
+
+  /* ---------------- 语义令牌：文本 ---------------- */
+  --text-primary: var(--ink-900);
+  --text-strong: var(--ink-800);
+  --text-secondary: var(--ink-600);
+  --text-tertiary: var(--ink-500);
+  --text-inverse: var(--ink-050);
+  --text-accent: var(--green-700);
+  --text-accent-strong: var(--green-700);
+  --text-danger: var(--danger-700);
+  --text-success: #536d4b;
+
+  /* ---------------- 语义令牌：边框 ---------------- */
+  --border-strong: var(--line-strong);
+  --border-default: var(--line-default);
+  --border-subtle: var(--line-subtle);
+  --border-accent: var(--green-600);
+  --border-danger: var(--danger-500);
+  --outline-color: var(--line-focus);
+
+  /* ---------------- 语义令牌：强调 ---------------- */
+  --accent-primary: var(--green-600);
+  --accent-primary-hover: var(--green-650);
+  --accent-primary-active: var(--green-700);
+  --accent-primary-soft: var(--surface-green-tint);
+  --accent-lime: var(--lime-400);
+  --accent-sage: var(--sage-400);
+  --accent-warm: var(--warm-400);
+  --accent-ai: var(--ai-500);
+
+  /* ---------------- 语义令牌：卡片强调色（图标底 + 图标线条） ----------------
+   * 供数据驱动卡片层（shared/ui/cards.css 的 .card-accent--*）使用：
+   * 同一个学科/方法在每一页都得到同一组色，颜色不在组件里硬编码。
+   * 取值直接对齐参考图首页「我的学科」六张学科卡的徽章实测：
+   *   绿 #D1E6D0/#003B0B（高等数学）、蓝 #D4E5F6/#12467A（信号与系统）、
+   *   琥珀 #FEE4BB/#824500（电路基础）、紫 #E3D8FA/#3E3079（英语）、
+   *   红 #F9C9C7/#8D0000（政治）、石板灰 #DDE2E8/#364352（自由学习）。
+   * 上面六组一一对应这里的 sage / indigo / warm / plum / clay / ink；
+   * lime 是第七个备用色（参考图未出现）。取值按参考图色相保留、亮度微调，
+   * 保证 ink 对 soft 的对比度 ≥ 6:1（实测见 DESIGN.md §3），
+   * 保持低饱和、不出现霓虹色（AGENTS.md §7.3）。 */
+  --accent-sage-soft: #d5e8d2;
+  --accent-sage-ink: #14532a;
+  --accent-lime-soft: #e9f0c9;
+  --accent-lime-ink: #4f5c22;
+  --accent-warm-soft: #fde4b8;
+  --accent-warm-ink: #7a4708;
+  --accent-clay-soft: #f8cfc9;
+  --accent-clay-ink: #8a2b22;
+  --accent-indigo-soft: #d8e6f7;
+  --accent-indigo-ink: #1c4a7c;
+  --accent-plum-soft: #e5dcfa;
+  --accent-plum-ink: #43327c;
+  --accent-ink-soft: #dfe4ea;
+  --accent-ink-ink: #3a4754;
+
+  --status-success: var(--success-500);
+  --status-warning: var(--warning-500);
+  --status-danger: var(--danger-500);
+
+  /* ---------------- 兼容别名（遗留页面样式） ---------------- */
+  --canvas: var(--bg-canvas);
+  --sidebar: var(--bg-sidebar);
+  --panel: var(--bg-panel);
+  --card: var(--bg-card);
+  --ink: var(--accent-ink);
+  --muted: var(--text-secondary);
+  --border: var(--border-default);
+  --sage: var(--status-success);
+  --radius: var(--radius-lg);
+
+  /* ---------------- 字体 ---------------- */
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+  --font-serif: Georgia, "Songti SC", serif;
+
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-md: 15px;
+  --text-lg: 17px;
+  --text-xl: 19px;
+  --text-2xl: 22px;
+  --text-3xl: 26px;
+  --text-title: clamp(28px, 3vw, 40px);
+  /* DESIGN.md §2/§5 实测补充：学科卡标题 16px（参考图卡片文字行字形高 16）、
+     hero 金句 28–30px（参考图两行金句实测 28–30）。 */
+  --text-card-title: 16px;
+  --text-hero: 30px;
+
+  --leading-tight: 1.4;
+  --leading-snug: 1.5;
+  --leading-normal: 1.6;
+  --leading-relaxed: 1.8;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 550;
+
+  --tracking-tight: -0.02em;
+  --tracking-tighter: -0.05em;
+  --tracking-wide: 0.16em;
+
+  /* ---------------- 间距（8px 基准） ---------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+  --space-10: 56px;
+  --space-11: 64px;
+  --space-12: 72px;
+
+  /* ---------------- 圆角 ---------------- */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+  --radius-pill: 999px;
+
+  /* ---------------- 阴影 ---------------- */
+  --shadow-soft: 0 12px 35px rgba(70, 60, 46, 0.05);
+  --shadow-card: 0 1px 2px rgba(70, 60, 46, 0.04);
+  --shadow-raised: 0 8px 24px rgba(70, 60, 46, 0.08);
+  --shadow-dialog: 0 20px 60px rgba(40, 35, 28, 0.2);
+
+  /* ---------------- 控件与动效 ---------------- */
+  --control-height: 44px;
+  --control-height-compact: 40px;
+  --border-width: 1px;
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 4px;
+
+  --motion-fast: 160ms;
+  --motion-normal: 220ms;
+  --ease-standard: ease;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  /* ---------------- 布局 ---------------- */
+  --layout-sidebar-width: 240px;
+  --layout-topbar-height: 88px;
+  /* DESIGN.md §6.5：内容列占满，页面留白 24–32px（参考图内容区 x230..1395 宽 ≈1165） */
+  --layout-gutter: 24px;
+  --layout-gutter-wide: 24px;
+  --layout-content-max: 1160px;
+  --layout-reading-max: 680px;
+  --layout-workspace-max: 900px;
+
+  /* ---------------- 层级 ---------------- */
+  --z-base: 0;
+  --z-topbar: 30;
+  --z-sticky: 40;
+  --z-overlay: 60;
+  --z-dialog: 70;
+  --z-toast: 80;
+}

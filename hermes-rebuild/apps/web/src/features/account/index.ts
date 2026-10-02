@@ -1,0 +1,1 @@
+export { AccountDataPage } from './AccountDataPage';

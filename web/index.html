@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Hermes 学习 OS · 云端</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Hermes 学习 OS <span class="tag">云端</span></div>
+    <div class="status" id="connStatus">未连接</div>
+    <div class="auth" id="authArea">
+      <button id="logoutBtn" class="btn ghost" hidden>退出</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <button id="newChat" class="btn primary">+ 新对话</button>
+      <div class="section-title">对话</div>
+      <div id="chatList" class="chat-list"></div>
+      <div class="section-title">云端任务</div>
+      <button id="newTask" class="btn">+ 新建任务</button>
+      <ul id="taskList" class="task-list"></ul>
+      <div class="section-title">本地节点</div>
+      <div id="nodeStatus" class="node-status">—</div>
+      <button id="newLocalCmd" class="btn ghost">创建本地执行命令</button>
+      <div id="cmdResult" class="cmd-result"></div>
+    </aside>
+
+    <section class="chat">
+      <div id="messages" class="messages">
+        <div class="empty">登录后开始与云端 Hermes 对话。电脑关闭时，平板仍可正常使用。</div>
+      </div>
+      <form id="chatForm" class="composer">
+        <textarea id="composer" placeholder="输入学习问题…（Enter 发送，Shift+Enter 换行）" rows="2"></textarea>
+        <button type="submit" class="btn primary">发送</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- Login modal -->
+  <div id="loginModal" class="modal">
+    <form id="loginForm" class="card">
+      <h2>登录云端 Hermes</h2>
+      <label>用户名<input id="loginUser" autocomplete="username" required /></label>
+      <label>密码<input id="loginPass" type="password" autocomplete="current-password" required /></label>
+      <button type="submit" class="btn primary">登录</button>
+      <div id="loginError" class="error" hidden></div>
+    </form>
+  </div>
+
+  <div id="banner" class="banner" hidden></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

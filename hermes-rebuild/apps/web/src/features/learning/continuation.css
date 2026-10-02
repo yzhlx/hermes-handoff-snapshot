@@ -1,0 +1,4 @@
+.continuation-context{display:grid;gap:8px;margin:16px 0 24px;padding:12px 16px;border-left:2px solid var(--border);color:var(--muted);overflow-wrap:anywhere}
+.continuation-context h3{margin:0;font-size:15px;font-weight:500;color:var(--ink)}
+.continuation-context p{margin:0;font-size:14px;line-height:1.65}
+.continuation-context button{justify-self:start;min-height:44px}

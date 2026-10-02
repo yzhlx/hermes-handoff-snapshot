@@ -1,0 +1,17 @@
+table,row_count
+conversations,1
+devices,0
+events,5
+execution_commands,0
+execution_nodes,0
+hermes_runs,1
+idempotency_records,1
+login_attempts,0
+memory_candidates,0
+memory_items,0
+messages,2
+schema_migrations,1
+sessions,1
+tasks,0
+tool_runs,0
+users,2

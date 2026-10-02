@@ -1,0 +1,411 @@
+/* ============================================================================
+   主站界面修复层（learning-os-refresh.css）
+   放在原 CSS 之后加载，只做覆盖，不改动原文件 —— 回滚只需删掉这一行引用。
+
+   本轮解决四类问题：
+     1. 密度：大块空白、信息太散 → 收紧间距、加内容宽度、行内对齐
+     2. 配色与重点：全米色没有视觉焦点 → 引入一个明确的强调色系统（赭石）
+     3. 字号与对比度：中文 10–11px 偏小偏灰 → 正文 15px、三级文字对比度 ≥4.6:1
+     4. 交互与反馈：hover/active/focus 缺失、按钮层级乱 → 统一反馈与层级
+   ========================================================================== */
+
+/* ---------- 1. 颜色 ---------- */
+:root {
+  /* 对比度修复（原值 → 现值的实测比） */
+  --text-tertiary: #6e6a61;   /* 2.61:1 → 4.66:1 on --bg-canvas */
+  --text-secondary: #5f5b53;  /* 4.47:1 → 5.84:1 */
+  --success: #3f7a55;         /* 2.96:1 → 4.68:1 */
+  --warning: #8a6520;         /* 2.40:1 → 4.87:1 */
+  --danger: #a03a30;          /* 3.49:1 → 6.14:1 */
+  --accent-danger: #b4232a;   /* 真正的警示红，只给「逾期 / 危险确认」 */
+
+  /* 强调色系统：全站唯一的视觉焦点，用于主行动 / 当前态 / 关键数字 */
+  --focus: #b4551f;
+  --focus-strong: #96440f;
+  --focus-soft: #f8ebdf;
+  --ink-cta: #24241f;
+
+  --radius-card: 14px;
+  --radius-ctl: 10px;
+}
+
+/* ---------- 2. 排版与密度 ---------- */
+body { font-size: 15px; line-height: 1.72; letter-spacing: 0; }
+.section-kicker { display: none !important; }          /* 25 处全大写装饰标签 */
+.local-note { display: none !important; }
+small, .page-summary, .task-meta, figcaption { font-size: 13px !important; }
+.timeline-footnote, .notebook-index-footnote, .planner-day-footnote { font-size: 12.5px; color: var(--text-tertiary); }
+
+.content { padding: 22px 26px 40px; }
+@media (min-width: 1600px) { .content { padding: 26px 40px 48px; } }
+.topbar { padding-bottom: 12px; }
+.page { gap: 18px; }
+.page-heading { margin-bottom: 4px; }
+.panel, .wa-card { border-radius: var(--radius-card); }
+.panel { padding: 18px 20px; }
+.panel-heading { margin-bottom: 10px; }
+.list-item { padding: 11px 14px; }
+.daily-metrics { gap: 10px; }
+.daily-metrics > div { padding: 14px 16px; }
+
+/* ---------- 3. 顶栏：页名 + 可执行状态句 ---------- */
+.page-path { display: none !important; }               /* 原来写死「学习记录 / 日期」 */
+.topbar h1 { font-size: 26px; line-height: 1.25; margin: 2px 0 0; }
+.page-status {
+  margin: 6px 0 0; font-size: 14px; color: var(--text-secondary);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-height: 22px;
+}
+.page-status .ps-strong { color: var(--focus); font-weight: 700; font-variant-numeric: tabular-nums; }
+.page-status .ps-alert { color: var(--accent-danger); font-weight: 700; }
+.page-status .ps-cta {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--focus); color: #fff; text-decoration: none; border: 0;
+  border-radius: 999px; padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.page-status .ps-cta:hover { background: var(--focus-strong); }
+
+.page-heading { display: flex; align-items: center; gap: 16px; justify-content: flex-start; flex-wrap: wrap; }
+.page-heading .page-summary { font-size: 14px !important; color: var(--text-secondary); margin: 0; max-width: 68ch; }
+.page-heading > div:empty, .page-heading .page-heading-text { display: none; }
+.page-heading > button,
+.page-heading > .review-page-action,
+.page-heading > .page-control,
+.page-heading > .planner-date-control { margin-left: auto; }
+
+/* ---------- 4. 空状态：卡片 + 图标 + 标题 + 一句解释 + 一个按钮 ---------- */
+.empty, .chat-empty-state, .canvas-empty {
+  background: var(--bg-card); border: 1px dashed var(--border-default);
+  border-radius: var(--radius-card); padding: 26px 24px; text-align: center; color: var(--text-secondary);
+}
+.empty p, .empty small, .empty strong { display: block; }
+.empty strong, .empty > b { font-size: 16px; color: var(--text-primary); font-weight: 600; margin-bottom: 4px; }
+.empty p { margin: 4px 0 0; }
+.empty-cta {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 14px;
+  background: var(--focus); color: #fff; border: 0; border-radius: 999px;
+  padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: background .16s ease, transform .16s ease;
+}
+.empty-cta:hover { background: var(--focus-strong); }
+.empty-cta:active { transform: translateY(1px); }
+.empty-cta.is-quiet { background: transparent; color: var(--text-primary); border: 1px solid var(--border-default); }
+.empty-cta.is-quiet:hover { background: var(--bg-card-muted); }
+.empty-icon {
+  width: 42px; height: 42px; margin: 0 auto 12px; border-radius: 12px;
+  display: grid; place-items: center; font-size: 20px;
+  background: var(--focus-soft); color: var(--focus);
+}
+
+/* ---------- 5. 按钮与交互反馈 ---------- */
+button, .list-item, .main-nav button, a {
+  transition: background-color .16s ease, color .16s ease, border-color .16s ease, transform .16s ease;
+}
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 8px;
+}
+button:disabled { opacity: .55; cursor: not-allowed; }
+button.primary, .empty-cta, .wa-btn--primary { background: var(--focus); border: 0; color: #fff; font-weight: 600; border-radius: var(--radius-ctl); }
+button.primary { min-height: 40px; }
+button.primary:hover { background: var(--focus-strong); }
+button.primary:active { transform: translateY(1px); }
+.quiet-button { min-height: 36px; border-radius: var(--radius-ctl); }
+.quiet-button:hover { background: var(--bg-card-muted); }
+#exitAppButton {
+  background: transparent !important; color: var(--danger) !important;
+  border: 1px solid var(--border-default) !important; box-shadow: none !important;
+}
+#exitAppButton:hover { background: rgba(160, 58, 48, .07) !important; }
+
+/* ---------- 6. 导航：主 4 项 + 更多 3 项，当前项用强调色 ---------- */
+.main-nav { gap: 2px; }
+.main-nav button { min-height: 40px; font-size: 14px; border-radius: 10px; }
+.main-nav button:hover { background: var(--bg-card-muted); }
+.main-nav button.active { background: var(--focus-soft); color: var(--focus-strong); font-weight: 700; box-shadow: inset 3px 0 0 var(--focus); }
+.main-nav button.nav-more { font-size: 13px; color: var(--text-secondary); }
+.main-nav .nav-sep {
+  margin: 8px 0 4px; padding-top: 8px; border-top: 1px solid var(--border-subtle);
+  font-size: 11px; color: var(--text-tertiary); letter-spacing: .06em;
+}
+.main-nav button .nav-badge {
+  margin-left: auto; background: var(--accent-danger); color: #fff;
+  border-radius: 999px; font-size: 11px; font-weight: 700; padding: 1px 7px;
+}
+.main-nav button .nav-badge[hidden] { display: none; }
+
+/* ---------- 7. 关键数字与指标：让重点跳出来 ---------- */
+.daily-metrics strong { font-size: 24px; font-variant-numeric: tabular-nums; color: var(--text-primary); letter-spacing: -.01em; }
+.daily-metrics small { color: var(--text-tertiary); }
+.date-chip { font-variant-numeric: tabular-nums; }
+
+/* ---------- 8. 旧错题 / 旧复习界面让位给新模块（保留 DOM，只隐藏） ----------
+   注意 .notebook-page-heading 里还有 app.js 动态创建的「拍照快速录入」按钮，
+   它写入的是旧系统 /api/v2/error-questions —— 必须一起隐藏，否则会出现两条写入路径。 */
+.notebook-layout,
+.notebook-page-heading,
+.review-page-action,
+.review-page-context,
+.review-page-heading,
+.review-list { display: none !important; }
+
+/* ---------- 9. 加载态：骨架屏 ---------- */
+@keyframes wa-shimmer { 0% { background-position: -320px 0; } 100% { background-position: 320px 0; } }
+.wa-skeleton {
+  height: 58px; border-radius: 12px; margin: 10px 0;
+  background: linear-gradient(90deg, var(--bg-card-muted) 0%, var(--bg-panel) 40%, var(--bg-card-muted) 80%);
+  background-size: 320px 100%; animation: wa-shimmer 1.2s linear infinite;
+}
+.wa-skeleton--tall { height: 220px; }
+
+@media (max-width: 1279px) {
+  .page-status { font-size: 13px; }
+  .topbar h1 { font-size: 22px; }
+  .content { padding: 18px 18px 32px; }
+}
+
+/* ============================================================================
+   三端布局重构（第三轮）—— 用户反馈：桌面要下翻、视觉重点弱、字细、平板错乱
+   实测依据（tools/probe-responsive.js）：
+     修复前 文档高 1440×900=1419px（1.6 屏）、1024×900=2044px（2.3 屏）、390=2680px
+     根因：① 标题字体 = Songti SC/宋体（中文衬线，Windows 上极细）
+           ② 桌面 3 列 + 指标格 104px + 到处 27px 内边距
+           ③ ≤860px 底栏高写死 92px，但 8 个导航项排成 3 行 → 第三行溢出屏幕（平板"UI 消失"）
+   ========================================================================== */
+
+/* ---------- 10. 字体与字重：去掉中文衬线标题，建立明确层级 ---------- */
+:root {
+  --font-display: var(--sans);   /* 原标题用 Songti SC → 在 Windows 上回退成宋体，又细又旧 */
+}
+body { font-family: var(--sans); font-size: 15px; line-height: 1.68; font-weight: 400; }
+h1, h2, h3, h4, h5, .today-greeting h2, .empty strong, .wa-empty strong, .brand, .daily-metrics strong {
+  font-family: var(--sans) !important;
+}
+.topbar h1 { font-size: 28px; font-weight: 700; letter-spacing: -.015em; }
+h2 { font-size: 19px; font-weight: 650; }
+h3 { font-size: 16px; font-weight: 600; }
+h4 { font-size: 14.5px; font-weight: 600; }
+strong, b { font-weight: 600; }
+.panel-heading h2, .panel-heading h3 { font-size: 16.5px; font-weight: 650; }
+.page-heading .page-summary { font-size: 14px !important; }
+.mission-body h2, #todayCurrent h2 { font-size: 21px; font-weight: 650; }
+.daily-metrics strong { font-weight: 700; font-size: 26px; }
+.daily-metrics small, .daily-metrics span { font-size: 12px !important; }
+
+/* ---------- 11. 桌面：两列 + 指标前置 + AI 面板下沉，首屏装下重点 ---------- */
+.today-dashboard {
+  grid-template-columns: minmax(238px, 286px) minmax(0, 1fr) !important;
+  min-height: 0 !important; gap: 18px; align-items: start;
+}
+.today-timeline { grid-column: 1; grid-row: 1; padding: 12px 16px 8px 0; border-right: 1px solid var(--border-default); }
+.today-workspace { grid-column: 2; grid-row: 1; padding: 12px 0 8px; display: flex; flex-direction: column; }
+.hermes-panel {
+  grid-column: 1 / -1; grid-row: 2; border-left: 0 !important; border-top: 1px solid var(--border-default);
+  padding: 14px 0 4px !important; display: grid !important; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 16px 22px; align-items: start;
+}
+.hermes-panel .ai-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.hermes-panel .ai-composer { grid-column: 2; }
+.today-greeting { display: none !important; }            /* 与顶栏状态句重复，且 31px 抢焦点 */
+.daily-metrics { order: -1; margin-bottom: 14px; }
+.mission-section { order: 1; }
+.today-notes { order: 2; }
+.today-notes .learning-prompt { display: none !important; }   /* 「先处理最接近遗忘边缘…」是格言 */
+.mission-intro { display: none !important; }
+.timeline-footnote { display: none !important; }
+.daily-metrics div { min-height: 68px; padding: 12px 14px; }
+.page-heading { padding: 12px 0 12px !important; }
+.topbar { padding-bottom: 10px !important; }
+.content { padding: 0 24px 24px !important; }
+.current-task { padding: 16px 18px !important; }
+
+/* ---------- 12. 平板 861–1279：侧栏收成图标条，内容两列 ---------- */
+@media (min-width: 861px) and (max-width: 1279px) {
+  .sidebar { width: 72px !important; padding: 14px 8px 12px !important; }
+  .brand { justify-content: center; }
+  .brand > span:not(.brand-mark) { display: none !important; }
+  .main-nav button { font-size: 0 !important; justify-content: center !important; padding: 9px 0 !important; min-height: 46px; }
+  .main-nav button::before { font-size: 18px !important; }
+  .main-nav .nav-sep { display: none !important; }
+  .sidebar-footer { padding: 10px 0 0 !important; }
+  .profile-button b, .profile-button small { display: none !important; }
+  .profile-button { justify-content: center; padding: 6px 0 !important; }
+  .today-dashboard { grid-template-columns: minmax(200px, 240px) minmax(0, 1fr) !important; }
+  .hermes-panel { grid-template-columns: minmax(0, 1fr); }
+  .hermes-panel .ai-composer { grid-column: 1; }
+  .hermes-panel .ai-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* ---------- 13. 手机 ≤860：底栏 5 格单行（不再溢出），主内容单列 ---------- */
+@media (max-width: 860px) {
+  .sidebar { height: auto !important; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)) !important; }
+  .main-nav {
+    display: grid !important; grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    grid-auto-rows: 50px; gap: 2px; width: 100% !important; overflow: visible !important;
+  }
+  .main-nav button { min-width: 0 !important; min-height: 50px; font-size: 11px !important; padding: 4px 2px !important; }
+  .main-nav button::before { font-size: 16px !important; margin-bottom: 2px; }
+  .main-nav button.nav-more { display: none !important; }       /* 收进「更多」抽屉 */
+  .main-nav .nav-sep {
+    display: grid !important; place-items: center; margin: 0 !important; padding: 0 !important;
+    border: 0 !important; font-size: 11px !important; letter-spacing: 0 !important;
+    cursor: pointer; border-radius: 10px;
+  }
+  .main-nav .nav-sep.on { background: var(--focus-soft); color: var(--focus-strong); }
+  .content { padding: 0 14px 96px !important; }
+  .today-dashboard { grid-template-columns: minmax(0, 1fr) !important; gap: 14px; }
+  .today-timeline { grid-column: 1; grid-row: auto; border-right: 0; border-bottom: 1px solid var(--border-default); padding: 12px 0; }
+  .today-workspace { grid-column: 1; padding: 12px 0 0; }
+  .hermes-panel { grid-template-columns: minmax(0, 1fr) !important; grid-row: auto; }
+  .hermes-panel .ai-composer { grid-column: 1; }
+  .daily-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .daily-metrics div { border-right: 0; border-bottom: 1px solid var(--border-default); min-height: 62px; }
+  .daily-metrics div:nth-child(odd) { border-right: 1px solid var(--border-default); }
+  .page-heading { padding: 10px 0 !important; }
+  .topbar h1 { font-size: 22px; }
+}
+@media (max-width: 540px) {
+  .daily-metrics { grid-template-columns: minmax(0, 1fr) !important; }
+  .daily-metrics div { border-right: 0 !important; }
+}
+
+/* 「更多」抽屉 */
+.nav-more-sheet {
+  position: fixed; left: 10px; right: 10px; bottom: calc(74px + env(safe-area-inset-bottom));
+  z-index: 60; display: none; padding: 10px;
+  background: var(--bg-card); border: 1px solid var(--border-default); border-radius: 16px;
+  box-shadow: 0 20px 44px -22px rgba(40, 33, 24, .45);
+}
+.nav-more-sheet.is-open { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.nav-more-sheet button {
+  min-height: 48px; border-radius: 12px; font-size: 14px; font-weight: 600;
+  border: 1px solid var(--border-default); background: var(--bg-panel); color: var(--text-primary);
+}
+.nav-more-sheet button:hover { background: var(--focus-soft); border-color: var(--focus); color: var(--focus-strong); }
+
+/* ---------- 14. 桌面重排（用 display:contents 把工作区拆进仪表盘网格） ----------
+   实测 1440×900 各块高度：topbar 82 / timeline 386 / workspace 1035（其中任务卡 553、
+   空态卡片 218+222）/ hermes-panel 411 / notes 305 → 文档 1620px，必须下翻。
+   重排目标：左列(时间轴) + 右列(指标→任务卡→AI)，文档压到一屏内。               */
+@media (min-width: 861px) {
+  .today-dashboard {
+    grid-template-columns: minmax(238px, 296px) minmax(0, 1fr) !important;
+    grid-template-rows: auto auto auto; gap: 14px 22px; align-items: start;
+    min-height: 0 !important;
+  }
+  .today-workspace { display: contents !important; }   /* 让子块直接参与仪表盘网格 */
+  .today-timeline { grid-column: 1; grid-row: 1 / 3; padding: 0 18px 0 0 !important; border-right: 1px solid var(--border-default); border-bottom: 0; }
+  .daily-metrics { grid-column: 2; grid-row: 1; margin: 0 !important; }
+  .mission-section {
+    grid-column: 2; grid-row: 2;
+    display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 14px 18px; align-items: start;
+  }
+  .mission-section .section-heading { grid-column: 1 / -1; margin-bottom: 0; }
+  #todayCurrent { grid-column: 1; }
+  .next-block { grid-column: 2; margin-top: 0 !important; }
+  .today-notes { grid-column: 1; grid-row: 3; display: grid; gap: 10px; }
+  .hermes-panel {
+    grid-column: 2; grid-row: 3;
+    border-left: 0 !important; border-top: 1px solid var(--border-default);
+    padding: 12px 0 0 !important; display: grid !important;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 10px 22px; align-items: start;
+  }
+  .hermes-panel .hermes-heading, .hermes-panel .ai-insight { grid-column: 1; }
+  .hermes-panel .hermes-heading { margin-bottom: -2px; }
+  .hermes-panel .ai-actions { grid-column: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .hermes-panel .ai-composer { grid-column: 2; grid-row: 1 / 4; margin: 0; align-self: start; }
+  .hermes-panel .ai-evidence { display: none; }
+}
+
+/* 空态卡片瘦身：站点空数据时这两张卡各占 220px，是首屏高度的最大来源 */
+.today-timeline .empty, .next-block .empty, #todayCurrent .empty, .today-notes .empty {
+  padding: 16px 14px !important; text-align: left;
+}
+.today-timeline .empty-icon, .next-block .empty-icon, .today-notes .empty-icon {
+  width: 30px; height: 30px; margin: 0 0 8px; font-size: 15px; border-radius: 9px;
+}
+.today-timeline .empty p, .next-block .empty p { display: none; }   /* 顶栏状态句已说明 */
+.today-timeline .empty strong, .next-block .empty strong { font-size: 15px; margin-bottom: 2px; }
+.today-timeline .empty-cta, .next-block .empty-cta, #todayCurrent .empty-cta {
+  margin-top: 10px; padding: 8px 16px; font-size: 13px; min-height: 36px;
+}
+.hermes-panel .ai-insight h3 { font-size: 15.5px; margin: 0 0 2px; }
+.hermes-panel .ai-insight p { font-size: 13px; margin: 0; }
+.hermes-panel .ai-action { min-height: 38px; font-size: 13px; }
+.status-note .panel-heading { margin-bottom: 6px; }
+.today-notes .status-summary { font-size: 13px; }
+
+
+/* ---------- 15. 首屏再收紧（桌面 991 → 目标 ≤900） ---------- */
+.today-notes .status-note { padding: 12px 14px !important; }
+.hermes-panel .ai-composer { display: none !important; }     /* 与「AI 对话」页重复，省 80px */
+.hermes-panel .ai-actions .ai-action { min-height: 36px; }
+.content { padding-bottom: 12px !important; }
+.today-timeline { padding-bottom: 0 !important; }
+.next-block { padding-top: 0 !important; }
+@media (max-width: 860px) {
+  .hermes-panel .ai-composer { display: block !important; }  /* 手机上聊天入口要留着 */
+}
+
+
+/* ---------- 15. 首屏再收紧（桌面 991 → 目标 ≤900） ---------- */
+.today-notes .status-note { padding: 12px 14px !important; }
+.hermes-panel .ai-composer { display: none !important; }     /* 与「AI 对话」页重复，省 80px */
+.hermes-panel .ai-actions .ai-action { min-height: 36px; }
+.content { padding-bottom: 12px !important; }
+.today-timeline { padding-bottom: 0 !important; }
+.next-block { padding-top: 0 !important; }
+@media (max-width: 860px) {
+  .hermes-panel .ai-composer { display: block !important; }  /* 手机上聊天入口要留着 */
+}
+
+/* ---------- 16. 最后 30px：确保 1440×900 首屏不下翻 ---------- */
+.daily-metrics div { min-height: 62px !important; padding: 10px 12px !important; }
+.topbar { padding-bottom: 6px !important; }
+.content { padding-bottom: 6px !important; }
+.hermes-panel { padding-top: 10px !important; }
+.mission-section { gap: 12px 18px !important; }
+.today-notes { gap: 8px !important; }
+
+/* ---------- 16. 最后 30px：确保 1440×900 首屏不下翻 ---------- */
+.daily-metrics div { min-height: 62px !important; padding: 10px 12px !important; }
+.topbar { padding-bottom: 6px !important; }
+.content { padding-bottom: 6px !important; }
+.hermes-panel { padding-top: 10px !important; }
+.mission-section { gap: 12px 18px !important; }
+.today-notes { gap: 8px !important; }
+
+/* ---------- 17. 收尾细节 ---------- */
+@media (max-width: 540px) {
+  /* 手机上 4 个指标走 2×2 比纵向 4 行省一半高度，数字仍看得清 */
+  .daily-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .daily-metrics div { border-right: 0 !important; border-bottom: 1px solid var(--border-default); min-height: 58px !important; }
+  .daily-metrics div:nth-child(odd) { border-right: 1px solid var(--border-default) !important; }
+  .daily-metrics div:nth-child(3), .daily-metrics div:nth-child(4) { border-bottom: 0; }
+}
+.empty-cta, .wa-btn, .page-status .ps-cta { white-space: nowrap; }
+.hermes-panel .ai-insight { padding: 14px 16px !important; }
+.hermes-panel .ai-insight p { font-size: 13px; line-height: 1.6; }
+
+/* ---------- 设置页：账号说明（P3 标注，不改鉴权） ---------- */
+.account-note { border-color: var(--focus); background: var(--focus-soft); }
+.account-note h3 { color: var(--text-primary); }
+.account-note p { color: var(--text-secondary); font-size: 13.5px; line-height: 1.7; }
+.account-note strong { color: var(--focus-strong); }
+
+/* ---------- 17. 收尾细节 ---------- */
+@media (max-width: 540px) {
+  /* 手机上 4 个指标走 2×2 比纵向 4 行省一半高度，数字仍看得清 */
+  .daily-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .daily-metrics div { border-right: 0 !important; border-bottom: 1px solid var(--border-default); min-height: 58px !important; }
+  .daily-metrics div:nth-child(odd) { border-right: 1px solid var(--border-default) !important; }
+  .daily-metrics div:nth-child(3), .daily-metrics div:nth-child(4) { border-bottom: 0; }
+}
+.empty-cta, .wa-btn, .page-status .ps-cta { white-space: nowrap; }
+.hermes-panel .ai-insight { padding: 14px 16px !important; }
+.hermes-panel .ai-insight p { font-size: 13px; line-height: 1.6; }
+
+/* ---------- 设置页：账号说明（P3 标注，不改鉴权） ---------- */
+.account-note { border-color: var(--focus); background: var(--focus-soft); }
+.account-note h3 { color: var(--text-primary); }
+.account-note p { color: var(--text-secondary); font-size: 13.5px; line-height: 1.7; }
+.account-note strong { color: var(--focus-strong); }
